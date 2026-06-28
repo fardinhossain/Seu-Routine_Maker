@@ -7,6 +7,7 @@ import {
   Download,
   FileCode2,
   FileDown,
+  MonitorSmartphone,
   MoreVertical,
   Printer,
   Sparkles,
@@ -169,14 +170,41 @@ export default function App() {
   async function captureRoutine() {
     if (!routineRef.current) return null;
     const { default: html2canvas } = await import("html2canvas");
-    return html2canvas(routineRef.current, {
+    const target = routineRef.current;
+    const table = target.querySelector("table");
+    const desktopTableWidth = 96 + routine.slots.length * 176;
+    const exportWidth = Math.max(table?.scrollWidth || 0, desktopTableWidth, 960);
+    const exportHeight = Math.max(target.scrollHeight, 1024);
+
+    return html2canvas(target, {
       backgroundColor: "#0d182b",
       scale: 2,
       useCORS: true,
       logging: false,
-      width: routineRef.current.scrollWidth,
-      height: routineRef.current.scrollHeight,
-      windowWidth: routineRef.current.scrollWidth,
+      width: exportWidth,
+      height: exportHeight,
+      windowWidth: Math.max(exportWidth, 1280),
+      windowHeight: exportHeight,
+      scrollX: 0,
+      scrollY: 0,
+      onclone: (clonedDocument) => {
+        const clonedRoutine = clonedDocument.querySelector('[data-routine-capture="true"]');
+        if (!clonedRoutine) return;
+
+        clonedRoutine.style.width = `${exportWidth}px`;
+        clonedRoutine.style.maxWidth = "none";
+        clonedRoutine.style.overflow = "visible";
+
+        const clonedScrollArea = clonedRoutine.querySelector(".routine-scroll");
+        if (clonedScrollArea) {
+          clonedScrollArea.style.width = "100%";
+          clonedScrollArea.style.overflow = "visible";
+        }
+
+        clonedRoutine.querySelectorAll(".sticky").forEach((element) => {
+          element.style.position = "static";
+        });
+      },
     });
   }
 
@@ -201,13 +229,13 @@ export default function App() {
       setExporting("pdf");
       const [{ jsPDF }, canvas] = await Promise.all([import("jspdf"), captureRoutine()]);
       if (!canvas) return;
-      const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const ratio = Math.min((pageWidth - 32) / canvas.width, (pageHeight - 32) / canvas.height);
-      const width = canvas.width * ratio;
-      const height = canvas.height * ratio;
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", (pageWidth - width) / 2, 16, width, height, undefined, "FAST");
+      const pdf = new jsPDF({
+        orientation: canvas.width >= canvas.height ? "landscape" : "portrait",
+        unit: "px",
+        format: [canvas.width, canvas.height],
+        hotfixes: ["px_scaling"],
+      });
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, canvas.width, canvas.height, undefined, "FAST");
       pdf.save("seu-weekly-routine.pdf");
     } catch {
       showMessage("error", "The PDF could not be created. Try downloading a PNG instead.");
@@ -398,6 +426,11 @@ export default function App() {
                   <FileDown size={16} /> {exporting === "pdf" ? "Creating…" : "PDF"}
                 </button>
               </div>
+            </div>
+
+            <div className="flex items-start gap-2.5 rounded-xl border border-sky-400/20 bg-sky-400/[.07] px-3.5 py-3 text-xs leading-5 text-sky-200 sm:hidden">
+              <MonitorSmartphone className="mt-0.5 shrink-0" size={17} />
+              <p><strong className="text-sky-100">Use Desktop Mode for a better view.</strong></p>
             </div>
 
             <RoutineTable ref={routineRef} selectedCourses={selectedCourses} routine={routine} shortNames={shortNames} />

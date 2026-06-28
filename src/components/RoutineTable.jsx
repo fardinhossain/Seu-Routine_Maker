@@ -43,7 +43,7 @@ const RoutineTable = forwardRef(function RoutineTable(
   );
 
   return (
-    <section ref={ref} className="print-area max-w-full overflow-hidden rounded-2xl border border-[#34445c]/70 bg-ink-800 shadow-glow sm:rounded-3xl">
+    <section ref={ref} data-routine-capture="true" className="print-area max-w-full overflow-hidden rounded-2xl border border-[#34445c]/70 bg-ink-800 shadow-glow sm:rounded-3xl">
       <div className="flex flex-col gap-4 border-b border-white/[.07] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
         <div className="flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mint-400/10 text-mint-300">
