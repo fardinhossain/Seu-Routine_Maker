@@ -138,10 +138,15 @@ export default function App() {
   }
 
   function handleClearHtml() {
+    clearRoutineStorage();
     setRawHtml("");
+    setCourses([]);
+    setSelectedCodes([]);
+    setCodeInput("");
+    setShortNames({});
     setImportSuccessMessage("");
-    writeStoredValue(STORAGE_KEYS.rawHtml, "");
-    showMessage("success", "Imported HTML cleared. Your parsed course sections are still saved.");
+    setImageResetKey((current) => current + 1);
+    showMessage("success", "Imported HTML, parsed sections, and routine data were cleared.");
   }
 
   function handleReset() {

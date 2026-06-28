@@ -116,7 +116,7 @@ export default function ImportPanel({
               type="button"
               onClick={clearHtmlInput}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-400/15 bg-rose-400/[.045] px-4 py-3 text-sm font-medium text-rose-300/80 transition hover:border-rose-400/30 hover:bg-rose-400/[.09] hover:text-rose-200"
-              title="Clear uploaded or pasted HTML while keeping parsed sections"
+              title="Clear imported HTML, parsed sections, and routine data"
             >
               <Trash2 size={15} /> Clear HTML
             </button>

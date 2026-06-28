@@ -20,7 +20,7 @@ const POLICY_ITEMS = [
   {
     icon: Trash2,
     title: "You control removal",
-    text: "Clear routine removes selections and the image preview. Reset saved data removes all information saved by the app in localStorage.",
+    text: "Clear HTML removes imported and parsed data. Clear routine removes selections and the image preview. Reset saved data removes everything saved by the app.",
   },
 ];
 

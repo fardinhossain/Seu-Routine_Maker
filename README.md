@@ -172,9 +172,9 @@ The app does use browser `localStorage`, so some data remains available on the s
 | Data | Storage location | Retention |
 |---|---|---|
 | Imported raw UMS HTML | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
-| Parsed course sections | Browser `localStorage` | Until **Reset saved data** or browser site data is cleared |
-| Selected course codes | Browser `localStorage` | Until **Clear routine**, **Reset saved data**, or browser site data is cleared |
-| Custom short names | Browser `localStorage` | Until **Reset saved data** or browser site data is cleared |
+| Parsed course sections | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
+| Selected course codes | Browser `localStorage` | Until **Clear routine**, **Clear HTML**, **Reset saved data**, or browser site data is cleared |
+| Custom short names | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
 | Uploaded screenshots | Browser memory only | Cleared after reset, reload, or leaving the page |
 | OCR language model | Browser cache/IndexedDB | Managed by the browser and removable through site-data settings |
 
@@ -184,7 +184,7 @@ The app does use browser `localStorage`, so some data remains available on the s
 - No UMS password or login credential is requested or collected.
 - Uploaded screenshots are processed locally in the browser with Tesseract.js.
 - The saved UMS HTML is parsed locally and is never rendered as executable page content.
-- **Clear HTML** removes the uploaded or pasted raw HTML while keeping the parsed course sections available.
+- **Clear HTML** removes imported HTML, parsed sections, selected codes, custom labels, routine data, and image-scanner state.
 - **Clear routine** removes selected courses and resets the image scanner while keeping parsed UMS data.
 - **Reset saved data** removes imported HTML, parsed courses, selections, custom labels, and image-scanner state from the app.
 
