@@ -46,6 +46,9 @@ export default function App() {
   const [message, setMessage] = useState(null);
   const [parsing, setParsing] = useState(false);
   const [exporting, setExporting] = useState("");
+  const [importSuccessMessage, setImportSuccessMessage] = useState(
+    initial.courses.length ? `${initial.courses.length} course sections parsed and saved in this browser.` : "",
+  );
   const [imageResetKey, setImageResetKey] = useState(0);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showPostAdvisingInstructions, setShowPostAdvisingInstructions] = useState(false);
@@ -107,6 +110,7 @@ export default function App() {
 
   function handleParse(htmlOverride) {
     const htmlToParse = typeof htmlOverride === "string" ? htmlOverride : rawHtml;
+    setImportSuccessMessage("");
     setParsing(true);
     window.setTimeout(() => {
       try {
@@ -114,7 +118,7 @@ export default function App() {
         setCourses(parsed);
         writeStoredValue(STORAGE_KEYS.rawHtml, htmlToParse);
         writeStoredValue(STORAGE_KEYS.courses, parsed);
-        showMessage("success", `${parsed.length} course sections parsed and saved in this browser.`);
+        setImportSuccessMessage(`${parsed.length} course sections parsed and saved in this browser.`);
       } catch (error) {
         showMessage("error", error.message || "The HTML could not be parsed.");
       } finally {
@@ -145,6 +149,7 @@ export default function App() {
     setSelectedCodes([]);
     setCodeInput("");
     setShortNames({});
+    setImportSuccessMessage("");
     setImageResetKey((current) => current + 1);
     showMessage("success", "All saved routine data has been reset.");
   }
@@ -349,6 +354,7 @@ export default function App() {
             onClearHtml={handleClearHtml}
             courseCount={courses.length}
             parsing={parsing}
+            successMessage={importSuccessMessage}
           />
           <CoursePicker
             courses={courses}

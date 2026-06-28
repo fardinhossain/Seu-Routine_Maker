@@ -1,7 +1,15 @@
 import { useRef, useState } from "react";
 import { CheckCircle2, FileCode2, LoaderCircle, Trash2, UploadCloud } from "lucide-react";
 
-export default function ImportPanel({ rawHtml, setRawHtml, onParse, onClearHtml, courseCount, parsing }) {
+export default function ImportPanel({
+  rawHtml,
+  setRawHtml,
+  onParse,
+  onClearHtml,
+  courseCount,
+  parsing,
+  successMessage,
+}) {
   const inputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -105,6 +113,13 @@ export default function ImportPanel({ rawHtml, setRawHtml, onParse, onClearHtml,
           />
         </label>
       </div>
+
+      {successMessage && !parsing && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-mint-400/20 bg-mint-400/[.07] px-3.5 py-3 text-sm text-mint-300" role="status">
+          <CheckCircle2 className="mt-0.5 shrink-0" size={17} />
+          <span>{successMessage}</span>
+        </div>
+      )}
 
       {parsing && (
         <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-mint-400/15 bg-mint-400/[.06] px-3.5 py-2.5 text-xs font-medium text-mint-300 sm:w-auto">
