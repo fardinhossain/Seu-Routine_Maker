@@ -187,11 +187,12 @@ export default function SectionOrganizerPage() {
     window.setTimeout(() => setCopied(false), 1800);
   }
 
-  function openRoutineInNewTab() {
+  function prepareRoutineLink(event) {
+    if (!selectedCodes.length) {
+      event.preventDefault();
+      return;
+    }
     writeStoredValue(STORAGE_KEYS.selectedCodes, selectedCodes);
-    const routineUrl = new URL(window.location.href);
-    routineUrl.hash = "routine";
-    window.open(routineUrl.toString(), "_blank", "noopener,noreferrer");
   }
 
   if (!courses.length) {
@@ -531,9 +532,16 @@ export default function SectionOrganizerPage() {
                 </button>
               </div>
 
-              <button type="button" onClick={openRoutineInNewTab} disabled={!selectedCodes.length} className="primary-button mt-2.5 w-full">
+              <a
+                href="#routine"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={prepareRoutineLink}
+                aria-disabled={!selectedCodes.length}
+                className={`primary-button mt-2.5 w-full ${!selectedCodes.length ? "pointer-events-none opacity-50" : ""}`}
+              >
                 <CalendarDays size={16} /> Check Routine
-              </button>
+              </a>
 
               {routine.conflicts.length > 0 && (
                 <div className="mt-4 rounded-xl border border-rose-400/25 bg-rose-400/[.08] p-3 text-xs text-rose-200">
