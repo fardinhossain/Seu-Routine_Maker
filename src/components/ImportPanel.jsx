@@ -48,7 +48,7 @@ export default function ImportPanel({
           <p className="mt-1 text-sm text-slate-400">Upload the saved page or paste its raw HTML.</p>
         </div>
         <div className="flex w-full shrink-0 flex-wrap justify-start gap-2 sm:w-auto sm:justify-end">
-          {courseCount > 0 && (
+          {courseCount > 0 && successMessage && (
             <span className="flex items-center gap-1.5 rounded-full bg-mint-400/10 px-2.5 py-1 text-xs font-medium text-mint-300">
               <CheckCircle2 size={13} /> {courseCount} parsed
             </span>

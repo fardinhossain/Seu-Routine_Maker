@@ -47,7 +47,9 @@ export default function App() {
   const [parsing, setParsing] = useState(false);
   const [exporting, setExporting] = useState("");
   const [importSuccessMessage, setImportSuccessMessage] = useState(
-    initial.courses.length ? `${initial.courses.length} course sections parsed and saved in this browser.` : "",
+    initial.rawHtml && initial.courses.length
+      ? `${initial.courses.length} course sections parsed and saved in this browser.`
+      : "",
   );
   const [imageResetKey, setImageResetKey] = useState(0);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -137,6 +139,7 @@ export default function App() {
 
   function handleClearHtml() {
     setRawHtml("");
+    setImportSuccessMessage("");
     writeStoredValue(STORAGE_KEYS.rawHtml, "");
     showMessage("success", "Imported HTML cleared. Your parsed course sections are still saved.");
   }
