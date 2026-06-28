@@ -1,4 +1,4 @@
-import { CalendarDays, Database, ShieldCheck } from "lucide-react";
+import { CalendarDays, Database } from "lucide-react";
 
 export default function AppHeader({ courseCount }) {
   return (
@@ -21,10 +21,6 @@ export default function AppHeader({ courseCount }) {
               {courseCount} sections saved
             </div>
           )}
-          <div className="flex items-center gap-2 rounded-full border border-mint-400/15 bg-mint-400/[.06] px-3 py-1.5 text-xs text-mint-300">
-            <ShieldCheck size={13} />
-            <span className="hidden sm:inline">Local only</span>
-          </div>
         </div>
       </div>
     </header>
