@@ -1,6 +1,79 @@
 const COURSE_CODE_PATTERN = /\b[A-Z]{2,}[A-Z0-9-]*\d{2,4}(?:\.\d+)+\b/i;
 const MEETING_PATTERN = /\b(SAT|SUN|MON|TUE|WED|THU|FRI)\s*#\s*(\d{1,2}:\d{2})\s*(?:~|–|—|-)\s*(\d{1,2}:\d{2})\s*@\s*([^\s,;|<]+)/gi;
 
+function decodeBytes(bytes, charset = "utf-8") {
+  try {
+    return new TextDecoder(charset.replace(/["']/g, "").trim() || "utf-8").decode(new Uint8Array(bytes));
+  } catch {
+    return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
+  }
+}
+
+function decodeQuotedPrintable(value, charset) {
+  const source = value.replace(/=\r?\n/g, "");
+  const bytes = [];
+  const encoder = new TextEncoder();
+
+  for (let index = 0; index < source.length; index += 1) {
+    const hex = source.slice(index + 1, index + 3);
+    if (source[index] === "=" && /^[0-9A-F]{2}$/i.test(hex)) {
+      bytes.push(Number.parseInt(hex, 16));
+      index += 2;
+      continue;
+    }
+
+    const codePoint = source.codePointAt(index);
+    const character = String.fromCodePoint(codePoint);
+    bytes.push(...encoder.encode(character));
+    if (codePoint > 0xffff) index += 1;
+  }
+
+  return decodeBytes(bytes, charset);
+}
+
+function decodeBase64(value, charset) {
+  const binary = atob(value.replace(/\s+/g, ""));
+  return decodeBytes([...binary].map((character) => character.charCodeAt(0)), charset);
+}
+
+function decodeMimePart(part) {
+  const separator = part.search(/\r?\n\r?\n/);
+  if (separator < 0) return "";
+
+  const headers = part.slice(0, separator);
+  const body = part.slice(separator).replace(/^\r?\n\r?\n/, "").replace(/\r?\n$/, "");
+  const encoding = headers.match(/Content-Transfer-Encoding:\s*([^\s;]+)/i)?.[1]?.toLowerCase();
+  const charset = headers.match(/charset\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+  const charsetName = charset?.[1] || charset?.[2] || charset?.[3] || "utf-8";
+
+  if (encoding === "quoted-printable") return decodeQuotedPrintable(body, charsetName);
+  if (encoding === "base64") return decodeBase64(body, charsetName);
+  return body;
+}
+
+export function extractHtmlPayload(rawDocument = "") {
+  const looksLikeMhtml = /Content-Type:\s*multipart\/related/i.test(rawDocument)
+    || (/MIME-Version:/i.test(rawDocument) && /Content-Type:\s*text\/html/i.test(rawDocument));
+  if (!looksLikeMhtml) return rawDocument;
+
+  const boundaryMatch = rawDocument.match(
+    /boundary\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s;\r\n]+))/i,
+  );
+  const boundary = boundaryMatch?.[1] || boundaryMatch?.[2] || boundaryMatch?.[3];
+  const parts = boundary ? rawDocument.split(`--${boundary}`) : [rawDocument];
+  const htmlPart = parts.find((part) => /Content-Type:\s*text\/html\b/i.test(part));
+
+  if (!htmlPart) {
+    throw new Error("The MHTML file does not contain a readable HTML page.");
+  }
+
+  const html = decodeMimePart(htmlPart);
+  if (!html.trim()) {
+    throw new Error("The HTML page inside the MHTML file is empty.");
+  }
+  return html;
+}
+
 function cleanText(value = "") {
   return value
     .replace(/\u00a0/g, " ")
@@ -118,7 +191,8 @@ export function parseUmsHtml(rawHtml) {
     throw new Error("Please upload or paste your UMS HTML first.");
   }
 
-  const document = new DOMParser().parseFromString(rawHtml, "text/html");
+  const htmlPayload = extractHtmlPayload(rawHtml);
+  const document = new DOMParser().parseFromString(htmlPayload, "text/html");
   const rows = [
     ...document.querySelectorAll("table tr"),
     ...document.querySelectorAll(".ums-grid-offered-section"),
@@ -147,7 +221,7 @@ export function parseUmsHtml(rawHtml) {
 
   if (!result.length) {
     throw new Error(
-      "No valid course sections with timetable data were found. Make sure this is the saved UMS Offered Sections page.",
+      "No valid course sections with timetable data were found. Make sure this is a saved UMS Offered Sections HTML or MHTML page.",
     );
   }
 

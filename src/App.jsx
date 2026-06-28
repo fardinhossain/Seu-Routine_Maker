@@ -280,13 +280,13 @@ export default function App() {
                   </span>
                   <span className="font-mono text-[10px] font-bold text-slate-600">03</span>
                 </div>
-                <p className="text-sm font-semibold text-slate-100">Save as an HTML page</p>
+                <p className="text-sm font-semibold text-slate-100">Save the page file</p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
                   <span className="block">
                     Desktop: press <kbd className="rounded bg-white/[.07] px-1.5 py-0.5 font-mono text-slate-300">Ctrl+S</kbd>.
                   </span>
                   <span className="mt-1 block">
-                    Mobile: tap <MoreVertical size={12} className="inline" /> then <strong className="text-slate-300">Download</strong>.
+                    Mobile: tap <MoreVertical size={12} className="inline" /> then <strong className="text-slate-300">Download</strong>. MHTML files are supported.
                   </span>
                 </p>
               </div>

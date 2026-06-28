@@ -44,7 +44,7 @@ No account, backend, or external database is required. The app is designed for b
 
 ## Features
 
-- Upload a saved UMS `.html` or `.htm` page.
+- Upload a saved UMS `.html`, `.htm`, `.mhtml`, or `.mht` page.
 - Paste raw UMS HTML manually.
 - Parse UMS Offered Sections and timetable information.
 - Store parsed data in browser `localStorage`.
@@ -74,9 +74,9 @@ Use this method with the UMS **Offered Sections** page.
 4. Wait until the full Offered Sections list is visible.
 5. Save the page as HTML:
    - **Desktop:** press `Ctrl + S`, select **Webpage, Complete** or **HTML**, and save the file.
-   - **Mobile:** open the browser menu `⋮`, choose **Download**, and save the page if your browser supports page downloads.
+   - **Mobile:** open the browser menu `⋮` and choose **Download**. Mobile Chrome may save the page as `.mhtml` or `.mht`; both formats are supported.
 6. Open SEU Routine Maker.
-7. Under **Add your UMS export**, upload the saved `.html` file.
+7. Under **Add your UMS export**, upload the saved `.html`, `.htm`, `.mhtml`, or `.mht` file.
 8. Wait for the success message confirming that the course sections were parsed and saved automatically.
 9. Add section codes using either option:
    - Type or paste codes such as `CSE361.3`, one per line or separated by commas.
@@ -280,6 +280,7 @@ Run `npm run dev` and open the URL shown in the terminal. Do not double-click `i
 - Make sure the page finished loading before saving it.
 - Select **Preregistered** before saving the Offered Sections page.
 - Try saving as **Webpage, Complete** on desktop.
+- On mobile, upload the downloaded `.mhtml` or `.mht` file directly; renaming it to `.html` is not required.
 
 ### The image scanner is disabled
 

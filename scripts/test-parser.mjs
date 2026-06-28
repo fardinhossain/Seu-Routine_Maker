@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
-import { makeShortTitle, parseUmsHtml } from "../src/lib/parser.js";
+import { extractHtmlPayload, makeShortTitle, parseUmsHtml } from "../src/lib/parser.js";
 import { extractCourseCodesFromOcr } from "../src/lib/ocr.js";
 import {
   buildRoutine,
@@ -36,6 +36,23 @@ assert.deepEqual(courses[0].meetings, [
 assert.equal(makeShortTitle("Operating Systems Lab"), "OS Lab");
 assert.equal(makeShortTitle("Introduction to Embedded Systems"), "ES");
 assert.equal(makeShortTitle("Computer Graphics & Animation Lab"), "CGA Lab");
+
+const mhtmlBoundary = "----=_SEU_ROUTINE_TEST";
+const quotedPrintableHtml = html.replace(/=/g, "=3D");
+const mhtml = [
+  "From: <Saved by Chrome>",
+  "MIME-Version: 1.0",
+  `Content-Type: multipart/related; boundary=\"${mhtmlBoundary}\"`,
+  "",
+  `--${mhtmlBoundary}`,
+  "Content-Type: text/html; charset=utf-8",
+  "Content-Transfer-Encoding: quoted-printable",
+  "",
+  quotedPrintableHtml,
+  `--${mhtmlBoundary}--`,
+].join("\r\n");
+assert.match(extractHtmlPayload(mhtml), /ums-grid-offered-section/);
+assert.deepEqual(parseUmsHtml(mhtml), courses);
 
 const conflictRoutine = buildRoutine([
   {

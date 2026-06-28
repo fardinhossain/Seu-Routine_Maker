@@ -16,8 +16,10 @@ export default function ImportPanel({
 
   function loadFile(file) {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".html") && !file.name.toLowerCase().endsWith(".htm")) {
-      setFileName("Please choose an HTML file");
+    const fileName = file.name.toLowerCase();
+    const supported = [".html", ".htm", ".mhtml", ".mht"].some((extension) => fileName.endsWith(extension));
+    if (!supported) {
+      setFileName("Choose an HTML or MHTML file");
       return;
     }
     const reader = new FileReader();
@@ -75,13 +77,13 @@ export default function ImportPanel({
           <span className="mb-3 grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/[.04] text-mint-400 transition group-hover:-translate-y-0.5">
             <UploadCloud size={23} />
           </span>
-          <span className="text-sm font-semibold text-slate-200">Drop your .html file here</span>
-          <span className="mt-1 max-w-52 truncate text-xs text-slate-500">{fileName || "or click to browse your computer"}</span>
+          <span className="text-sm font-semibold text-slate-200">Drop your HTML or MHTML file here</span>
+          <span className="mt-1 max-w-60 truncate text-xs text-slate-500">{fileName || ".html, .htm, .mhtml, and .mht supported"}</span>
           <input
             ref={inputRef}
             className="hidden"
             type="file"
-            accept=".html,.htm,text/html"
+            accept=".html,.htm,.mhtml,.mht,text/html,multipart/related"
             onChange={(event) => loadFile(event.target.files?.[0])}
           />
         </button>
