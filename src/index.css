@@ -164,33 +164,313 @@ textarea:focus-visible {
 
 @media print {
   @page {
-    size: landscape;
-    margin: 10mm;
+    size: A4 landscape;
+    margin: 8mm;
   }
 
+  :root {
+    color-scheme: light;
+  }
+
+  html,
   body {
-    background: #0d182b !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #172033;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  body * {
-    visibility: hidden;
+  html {
+    scroll-behavior: auto;
   }
 
-  .print-area,
-  .print-area * {
-    visibility: visible;
+  #root,
+  #root > div {
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  #root > div > * {
+    display: none !important;
+  }
+
+  #root > div > main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root > div > main > * {
+    display: none !important;
+  }
+
+  #root > div > main > #routine {
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  #routine > * {
+    display: none !important;
+  }
+
+  #routine > .print-area {
+    display: block !important;
   }
 
   .print-area {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: static;
     width: 100%;
-    border: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 3mm !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #172033 !important;
+    break-inside: avoid;
+  }
+
+  .routine-print-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 5mm !important;
+    min-height: 20mm;
+    padding: 3mm 4mm !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+  }
+
+  .routine-print-heading {
+    gap: 2.5mm !important;
+  }
+
+  .routine-print-icon {
+    width: 9mm !important;
+    height: 9mm !important;
+    border: 1px solid #99f6e4;
+    border-radius: 2.5mm !important;
+    background: #ecfeff !important;
+    color: #0f766e !important;
+  }
+
+  .routine-print-icon svg {
+    width: 5mm;
+    height: 5mm;
+  }
+
+  .routine-print-heading h2 {
+    color: #0f172a !important;
+    font-size: 13pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .routine-print-heading p {
+    margin-top: .7mm;
+    color: #475569 !important;
+    font-size: 8pt !important;
+    line-height: 1.2 !important;
+  }
+
+  .routine-print-summary {
+    width: auto !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 2mm !important;
+    background: #fff !important;
+  }
+
+  .routine-print-summary > div {
+    min-width: 20mm;
+    padding: 1.5mm 3mm !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .routine-print-summary strong {
+    color: #0f172a !important;
+    font-size: 9pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .routine-print-summary span {
+    color: #475569 !important;
+    font-size: 6pt !important;
+    line-height: 1.1 !important;
+    letter-spacing: .08em !important;
   }
 
   .routine-scroll {
+    width: 100% !important;
     overflow: visible !important;
+  }
+
+  .routine-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: #172033 !important;
+  }
+
+  .routine-table thead {
+    display: table-header-group;
+  }
+
+  .routine-table tr {
+    break-inside: avoid;
+  }
+
+  .routine-table th,
+  .routine-table td {
+    min-width: 0 !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .routine-day-heading,
+  .routine-day {
+    position: static !important;
+    width: 14mm;
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+  }
+
+  .routine-day-heading {
+    padding: 2.5mm 2mm !important;
+    font-size: 6.5pt !important;
+  }
+
+  .routine-slot-heading {
+    padding: 2.2mm 2.5mm !important;
+    background: #f8fafc !important;
+  }
+
+  .routine-slot-heading > span:first-child {
+    color: #0f172a !important;
+    font-size: 8pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .routine-slot-heading > span:last-child {
+    margin-top: .5mm !important;
+    color: #64748b !important;
+    font-size: 6.5pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .routine-slot-heading strong {
+    color: #334155 !important;
+  }
+
+  .routine-table tbody tr {
+    height: 19.5mm;
+  }
+
+  .routine-day {
+    padding: 2.5mm 2mm !important;
+    font-size: 7.5pt !important;
+    line-height: 1.1 !important;
+    letter-spacing: .1em !important;
+  }
+
+  .routine-cell {
+    height: 19.5mm !important;
+    padding: 1.2mm !important;
+    background: #fff !important;
+  }
+
+  .routine-cell > div {
+    margin: 0 !important;
+  }
+
+  .routine-course-card {
+    padding: 1.8mm 2mm !important;
+    border-width: 1px !important;
+    border-radius: 2mm !important;
+    background: #f8fafc !important;
+    color: #164e63 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .routine-course-card[data-color-index="0"] {
+    border-color: #67c5d0 !important;
+    background: #ecfeff !important;
+    color: #155e75 !important;
+  }
+
+  .routine-course-card[data-color-index="1"] {
+    border-color: #a78bfa !important;
+    background: #f5f3ff !important;
+    color: #5b21b6 !important;
+  }
+
+  .routine-course-card[data-color-index="2"] {
+    border-color: #f0b94d !important;
+    background: #fffbeb !important;
+    color: #92400e !important;
+  }
+
+  .routine-course-card[data-color-index="3"] {
+    border-color: #6ee7b7 !important;
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+  }
+
+  .routine-course-card[data-color-index="4"] {
+    border-color: #7dd3fc !important;
+    background: #f0f9ff !important;
+    color: #0369a1 !important;
+  }
+
+  .routine-course-card[data-color-index="5"] {
+    border-color: #e879f9 !important;
+    background: #fdf4ff !important;
+    color: #a21caf !important;
+  }
+
+  .routine-course-card p {
+    color: inherit !important;
+  }
+
+  .routine-course-card p:first-child {
+    font-size: 6.8pt !important;
+    line-height: 1.1 !important;
+    letter-spacing: .02em !important;
+  }
+
+  .routine-course-title {
+    margin-top: 1mm !important;
+    font-size: 8pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .routine-course-details {
+    margin-top: 1mm !important;
+    color: inherit !important;
+    font-size: 6.5pt !important;
+    line-height: 1.1 !important;
+    opacity: .72 !important;
+  }
+
+  .print-area[data-slot-count="7"] .routine-course-card,
+  .print-area[data-slot-count="8"] .routine-course-card,
+  .print-area[data-slot-count="9"] .routine-course-card {
+    padding-right: 1.2mm !important;
+    padding-left: 1.2mm !important;
+  }
+
+  .print-area[data-slot-count="7"] .routine-course-title,
+  .print-area[data-slot-count="8"] .routine-course-title,
+  .print-area[data-slot-count="9"] .routine-course-title {
+    font-size: 7pt !important;
   }
 
   .no-print {
