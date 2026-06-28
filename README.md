@@ -20,7 +20,7 @@
 - [Features](#features)
 - [How to use the web app](#how-to-use-the-web-app)
 - [Course selection rules](#course-selection-rules)
-- [Data storage and privacy](#data-storage-and-privacy)
+- [Data storage, privacy, and security](#data-storage-privacy-and-security)
 - [Run locally](#run-locally)
 - [Available commands](#available-commands)
 - [Project structure](#project-structure)
@@ -161,17 +161,36 @@ When a conflict is found:
 - Quick **Remove** buttons appear for the conflicting codes.
 - Print, PNG, and PDF actions remain disabled until the conflict is resolved.
 
-## Data storage and privacy
+## Data storage, privacy, and security
 
-The application is client-side only.
+### Is any data stored permanently?
 
-- Raw HTML, parsed courses, selected codes, and custom short names are stored in browser `localStorage`.
-- Uploaded screenshots are kept only in memory while OCR is running.
-- Screenshots are not stored in `localStorage` or uploaded to an application server.
-- **Clear routine** removes selected courses and resets the image scanner but keeps parsed UMS data.
-- **Reset saved data** removes HTML, parsed courses, selections, custom labels, and image-scanner state.
+**No data is stored in a permanent cloud database or on an application server.** SEU Routine Maker has no backend, user account system, or database. Routine processing happens inside the user's browser.
 
-The OCR engine may download its language model the first time image recognition is used.
+The app does use browser `localStorage`, so some data remains available on the same browser after closing or reopening the website. It stays there until the user selects **Reset saved data**, clears the browser's site data, or removes the browser profile.
+
+| Data | Storage location | Retention |
+|---|---|---|
+| Imported raw UMS HTML | Browser `localStorage` | Until **Reset saved data** or browser site data is cleared |
+| Parsed course sections | Browser `localStorage` | Until **Reset saved data** or browser site data is cleared |
+| Selected course codes | Browser `localStorage` | Until **Clear routine**, **Reset saved data**, or browser site data is cleared |
+| Custom short names | Browser `localStorage` | Until **Reset saved data** or browser site data is cleared |
+| Uploaded screenshots | Browser memory only | Cleared after reset, reload, or leaving the page |
+| OCR language model | Browser cache/IndexedDB | Managed by the browser and removable through site-data settings |
+
+### Private by design
+
+- No UMS HTML, routine, course selection, or screenshot is uploaded to an application server.
+- No UMS password or login credential is requested or collected.
+- Uploaded screenshots are processed locally in the browser with Tesseract.js.
+- The saved UMS HTML is parsed locally and is never rendered as executable page content.
+- **Clear routine** removes selected courses and resets the image scanner while keeping parsed UMS data.
+- **Reset saved data** removes imported HTML, parsed courses, selections, custom labels, and image-scanner state from the app.
+
+> [!IMPORTANT]
+> Browser `localStorage` is not encrypted. Anyone with access to the same unlocked browser profile may be able to inspect locally saved data. On a shared or public device, use **Reset saved data** when finished and clear the browser's site data for additional privacy.
+
+The app is therefore private and secure from server-side data collection by design, while local-device security still depends on the user's browser profile and device access.
 
 ## Run locally
 
