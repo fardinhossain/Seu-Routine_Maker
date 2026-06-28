@@ -394,6 +394,13 @@ export default function App() {
       </main>
 
       <footer className="border-t border-white/[.06] bg-[#060d18] px-4 py-12 text-center sm:py-14">
+        <button
+          type="button"
+          onClick={() => setShowDataPolicy(true)}
+          className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-white/[.035] px-3.5 py-1.5 text-xs font-medium text-slate-400 transition hover:border-mint-400/25 hover:bg-mint-400/[.06] hover:text-mint-300"
+        >
+          Data Policy
+        </button>
         <p className="text-xl font-bold tracking-[-.03em] text-white sm:text-2xl">
           SEU <span className="text-mint-400">Routine Maker</span>
         </p>
@@ -411,13 +418,6 @@ export default function App() {
             @Fardin_Hossain
           </a>
         </p>
-        <button
-          type="button"
-          onClick={() => setShowDataPolicy(true)}
-          className="mt-4 text-xs font-medium text-slate-500 underline decoration-white/20 underline-offset-4 transition hover:text-mint-300 hover:decoration-mint-400/50"
-        >
-          Data Policy
-        </button>
       </footer>
 
       {showDataPolicy && <DataPolicyModal onClose={() => setShowDataPolicy(false)} />}
