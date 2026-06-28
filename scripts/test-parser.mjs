@@ -5,6 +5,7 @@ import { extractCourseCodesFromOcr } from "../src/lib/ocr.js";
 import {
   buildRoutine,
   findDuplicateCourseSelections,
+  formatTime12,
   parseCodeList,
   uniqueCourseSelections,
 } from "../src/lib/routine.js";
@@ -63,6 +64,9 @@ assert.deepEqual(conflictRoutine.conflicts[0], {
   end: "14:50",
 });
 assert.equal(conflictRoutine.conflictIds.size, 2);
+assert.equal(formatTime12("08:00"), "8:00 AM");
+assert.equal(formatTime12("13:30"), "1:30 PM");
+assert.equal(formatTime12("00:15"), "12:15 AM");
 
 const sharedStartRoutine = buildRoutine([
   {

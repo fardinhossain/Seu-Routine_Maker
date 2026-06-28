@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { formatTime12 } from "../lib/routine";
 
 export default function ConflictAlert({ conflicts }) {
   if (!conflicts.length) return null;
@@ -15,7 +16,7 @@ export default function ConflictAlert({ conflicts }) {
           <div className="mt-2 space-y-1 text-sm text-rose-200/75">
             {conflicts.map((conflict, index) => (
               <p key={`${conflict.first}-${conflict.second}-${conflict.day}-${index}`}>
-                Conflict found: <strong className="text-rose-100">{conflict.first}</strong> and <strong className="text-rose-100">{conflict.second}</strong> on {conflict.day} {conflict.start}–{conflict.end}
+                Conflict found: <strong className="text-rose-100">{conflict.first}</strong> and <strong className="text-rose-100">{conflict.second}</strong> on {conflict.day} {formatTime12(conflict.start)}–{formatTime12(conflict.end)}
               </p>
             ))}
           </div>

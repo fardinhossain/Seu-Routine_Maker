@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AlertCircle, AlertTriangle, RotateCcw, Search, Trash2, X, Zap } from "lucide-react";
-import { courseIdentity, parseCodeList } from "../lib/routine";
+import { courseIdentity, formatTime12, parseCodeList } from "../lib/routine";
 import ImageCourseScanner from "./ImageCourseScanner";
 
 export default function CoursePicker({
@@ -148,7 +148,7 @@ export default function CoursePicker({
                   <p key={`${conflict.first}-${conflict.second}-${conflict.day}-${index}`}>
                     <strong className="text-rose-100">{conflict.first}</strong> and{" "}
                     <strong className="text-rose-100">{conflict.second}</strong>
-                    {" · "}{conflict.day} {conflict.start}–{conflict.end}
+                    {" · "}{conflict.day} {formatTime12(conflict.start)}–{formatTime12(conflict.end)}
                   </p>
                 ))}
               </div>

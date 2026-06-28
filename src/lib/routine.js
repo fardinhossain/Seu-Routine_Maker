@@ -5,6 +5,16 @@ export function timeToMinutes(time) {
   return hours * 60 + minutes;
 }
 
+export function formatTime12(time) {
+  const [hoursText, minutes = "00"] = String(time).split(":");
+  const hours = Number(hoursText);
+  if (!Number.isFinite(hours)) return time;
+
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHour = hours % 12 || 12;
+  return `${displayHour}:${minutes} ${period}`;
+}
+
 export function parseCodeList(value = "") {
   return [...new Set(
     value

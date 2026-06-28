@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { CalendarRange } from "lucide-react";
-import { WEEK_DAYS, timeToMinutes } from "../lib/routine";
+import { formatTime12, WEEK_DAYS, timeToMinutes } from "../lib/routine";
 
 const CARD_STYLES = [
   "border-cyan-300/20 bg-cyan-300/[.09] text-cyan-100",
@@ -79,12 +79,12 @@ const RoutineTable = forwardRef(function RoutineTable(
               </th>
               {routine.slots.map((slot) => (
                 <th key={slot.key} className="min-w-[176px] border-b border-r border-white/[.07] px-4 py-3 last:border-r-0">
-                  <span className="block font-mono text-sm font-semibold text-slate-200">{slot.start}</span>
+                  <span className="block font-mono text-sm font-semibold text-slate-200">{formatTime12(slot.start)}</span>
                   <span className="mt-0.5 block font-mono text-[10px] font-normal text-slate-500">
                     to{" "}
                     {slot.ends.map((end, index) => (
                       <span key={end}>
-                        <strong className="font-semibold text-white">{end}</strong>
+                        <strong className="font-semibold text-white">{formatTime12(end)}</strong>
                         {index < slot.ends.length - 1 && <span> / </span>}
                       </span>
                     ))}
