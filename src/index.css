@@ -14,12 +14,15 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-family: Inter, Aptos, "Segoe UI", sans-serif;
   background:
     radial-gradient(circle at 10% 0%, rgba(32, 222, 214, .065), transparent 25rem),
     #091326;

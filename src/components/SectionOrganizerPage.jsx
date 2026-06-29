@@ -237,28 +237,28 @@ export default function SectionOrganizerPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-ink-950 text-slate-200">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-ink-950 text-slate-200">
       <header className="border-b border-white/[.06] bg-ink-950/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
           <a href="#" className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-white">
             <ArrowLeft size={17} /> <span className="hidden sm:inline">Back to Routine Maker</span><span className="sm:hidden">Back</span>
           </a>
-          <span className="inline-flex items-center gap-2 rounded-full border border-mint-400/15 bg-mint-400/[.06] px-3 py-1.5 text-xs font-medium text-mint-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-mint-400/15 bg-mint-400/[.06] px-2.5 py-1.5 text-[11px] font-medium text-mint-300 sm:gap-2 sm:px-3 sm:text-xs">
             <WandSparkles size={14} /> Magic Organizer
           </span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1500px] px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pt-12">
-        <section className="relative overflow-hidden rounded-2xl border border-white/[.07] bg-[radial-gradient(circle_at_90%_20%,rgba(32,222,214,.1),transparent_35%),rgba(255,255,255,.025)] p-5 sm:rounded-3xl sm:p-8 lg:p-10">
-          <div className="relative max-w-3xl">
+      <main className="mx-auto w-full min-w-0 max-w-[1500px] px-3 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8 lg:pt-12">
+        <section className="relative min-w-0 overflow-hidden rounded-2xl border border-white/[.07] bg-[radial-gradient(circle_at_90%_20%,rgba(32,222,214,.1),transparent_35%),rgba(255,255,255,.025)] p-4 sm:rounded-3xl sm:p-8 lg:p-10">
+          <div className="relative min-w-0 max-w-3xl">
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-mint-400">
               <Sparkles size={14} /> Smart section planning
             </span>
-            <h1 className="mt-3 text-3xl font-semibold tracking-[-.04em] text-white sm:text-5xl">
+            <h1 className="mt-3 break-words text-2xl font-semibold leading-tight tracking-[-.04em] text-white sm:text-5xl">
               Find the best sections by <span className="text-mint-400">day and time.</span>
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+            <p className="mt-3 max-w-2xl break-words text-sm leading-6 text-slate-400 sm:mt-4 sm:text-base">
               Sections with identical schedules are grouped together. Select one section per course, check conflicts, then copy the generated codes or open your completed routine in a new tab.
             </p>
           </div>
@@ -268,11 +268,11 @@ export default function SectionOrganizerPage() {
           <button
             type="button"
             onClick={() => setShowInstructions((current) => !current)}
-            className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-white/[.025] sm:px-5"
+            className="flex w-full min-w-0 items-center gap-2.5 px-3 py-3.5 text-left transition hover:bg-white/[.025] sm:gap-3 sm:px-5 sm:py-4"
             aria-expanded={showInstructions}
             aria-controls="organizer-instructions"
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-mint-400/10 text-mint-300">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-mint-400/10 text-mint-300 sm:h-9 sm:w-9 sm:rounded-xl">
               <CircleHelp size={18} />
             </span>
             <span className="min-w-0 flex-1">
@@ -310,13 +310,13 @@ export default function SectionOrganizerPage() {
         </section>
 
         <section className="panel mt-3 p-4 sm:p-5">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_250px_250px_auto] xl:items-end">
+          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_250px_250px_auto] xl:items-end">
             <label className="block min-w-0">
               <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><Search size={14} /> Search sections</span>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="field text-sm"
+                className="field text-base sm:text-sm"
                 placeholder="Search by code, title, or faculty…"
               />
             </label>
@@ -328,7 +328,7 @@ export default function SectionOrganizerPage() {
                   setCourseMenuOpen((current) => !current);
                   setTeacherMenuOpen(false);
                 }}
-                className={`field flex w-full items-center justify-between gap-3 text-left text-sm ${courseMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                className={`field flex w-full items-center justify-between gap-3 text-left text-base sm:text-sm ${courseMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by course"
                 aria-haspopup="listbox"
                 aria-expanded={courseMenuOpen}
@@ -379,7 +379,7 @@ export default function SectionOrganizerPage() {
                   setTeacherMenuOpen((current) => !current);
                   setCourseMenuOpen(false);
                 }}
-                className={`field flex w-full items-center justify-between gap-3 text-left text-sm ${teacherMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                className={`field flex w-full items-center justify-between gap-3 text-left text-base sm:text-sm ${teacherMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by teacher"
                 aria-haspopup="listbox"
                 aria-expanded={teacherMenuOpen}
@@ -422,7 +422,7 @@ export default function SectionOrganizerPage() {
             </div>
             <div className="md:col-span-2 xl:col-span-1">
               <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><Filter size={14} /> Filter by day</span>
-              <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">
+              <div className="flex w-full min-w-0 max-w-full gap-1.5 overflow-x-auto overscroll-x-contain pb-2">
                 {["ALL", ...WEEK_DAYS].map((day) => (
                   <button
                     type="button"
@@ -440,26 +440,26 @@ export default function SectionOrganizerPage() {
               </div>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+          <div className="mt-3 flex min-w-0 flex-wrap gap-1.5 text-[11px] text-slate-500 sm:mt-4 sm:gap-2 sm:text-xs">
             <span className="rounded-full bg-white/[.035] px-2.5 py-1">{courses.length} sections</span>
             <span className="rounded-full bg-white/[.035] px-2.5 py-1">{allGroups.length} schedule groups</span>
             <span className="rounded-full bg-mint-400/[.07] px-2.5 py-1 text-mint-300">{selectedCodes.length} selected</span>
           </div>
         </section>
 
-        <div className="mt-5 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="min-w-0 space-y-4">
+        <div className="mt-4 grid min-w-0 gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <section className="min-w-0 space-y-3 sm:space-y-4">
             {visibleGroups.map((group) => (
               <article key={group.key} className="panel overflow-hidden">
-                <header className="border-b border-white/[.07] bg-ink-950/30 px-4 py-4 sm:px-5">
-                  <div className="flex flex-wrap items-center gap-2">
+                <header className="border-b border-white/[.07] bg-ink-950/30 px-3 py-3 sm:px-5 sm:py-4">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <span className="grid h-8 w-8 place-items-center rounded-lg bg-mint-400/10 text-mint-300"><Clock3 size={16} /></span>
                     {group.meetings.map((meeting) => (
-                      <span key={`${meeting.day}-${meeting.start}`} className="rounded-lg border border-white/[.08] bg-white/[.03] px-2.5 py-1.5 font-mono text-xs text-slate-300">
+                      <span key={`${meeting.day}-${meeting.start}`} className="max-w-full rounded-lg border border-white/[.08] bg-white/[.03] px-2 py-1.5 font-mono text-[11px] text-slate-300 sm:px-2.5 sm:text-xs">
                         <strong className="text-mint-300">{meeting.day}</strong> · {formatTime12(meeting.start)}–{formatTime12(meeting.end)}
                       </span>
                     ))}
-                    <span className="ml-auto text-xs text-slate-500">{group.courses.length} section{group.courses.length === 1 ? "" : "s"}</span>
+                    <span className="w-full pl-10 text-[11px] text-slate-500 sm:ml-auto sm:w-auto sm:pl-0 sm:text-xs">{group.courses.length} section{group.courses.length === 1 ? "" : "s"}</span>
                   </div>
                 </header>
 
@@ -503,7 +503,7 @@ export default function SectionOrganizerPage() {
                               : selected && <Check size={13} strokeWidth={3} />}
                           </span>
                         </div>
-                        <p className="mt-2 line-clamp-2 text-sm font-semibold leading-5 text-slate-200">{course.courseTitle}</p>
+                        <p className="mt-2 break-words text-sm font-semibold leading-5 text-slate-200 sm:line-clamp-2">{course.courseTitle}</p>
                         <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">
                           <span className="min-w-0 break-words text-slate-400">
                             {course.facultyName || course.faculty}
@@ -525,8 +525,8 @@ export default function SectionOrganizerPage() {
             )}
           </section>
 
-          <aside id="selected-codes" className="min-w-0 lg:sticky lg:top-5 lg:self-start">
-            <div className="panel p-4 sm:p-5">
+          <aside id="selected-codes" className="order-first min-w-0 lg:order-none lg:sticky lg:top-5 lg:self-start">
+            <div className="panel p-3 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[.16em] text-mint-400">Generated field</p>
@@ -545,7 +545,7 @@ export default function SectionOrganizerPage() {
                 aria-label="Generated selected course codes"
               />
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 <button type="button" onClick={handleCopy} disabled={!selectedCodes.length} className="secondary-button px-2">
                   {copied ? <Check size={16} /> : <Copy size={16} />}{copied ? "Copied" : "Copy codes"}
                 </button>
@@ -554,7 +554,7 @@ export default function SectionOrganizerPage() {
                 </button>
               </div>
 
-              <div className="mt-2.5 grid grid-cols-2 gap-2">
+              <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => setShowRoutinePreview(true)}
