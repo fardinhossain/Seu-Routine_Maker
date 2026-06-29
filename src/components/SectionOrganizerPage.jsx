@@ -588,7 +588,6 @@ export default function SectionOrganizerPage() {
                 </div>
               )}
 
-              <p className="mt-4 text-[11px] leading-5 text-slate-600">Selecting another section of the same course asks for confirmation before replacing the previous section.</p>
             </div>
           </aside>
         </div>
