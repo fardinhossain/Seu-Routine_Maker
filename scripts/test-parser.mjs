@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { extractHtmlPayload, makeShortTitle, parseUmsHtml } from "../src/lib/parser.js";
 import { extractCourseCodesFromOcr } from "../src/lib/ocr.js";
-import { groupSectionsBySchedule } from "../src/lib/sectionGroups.js";
+import {
+  dayPatternKey,
+  getDayPatternOptions,
+  getTimeSlotOptions,
+  groupSectionsBySchedule,
+  matchesScheduleFilters,
+} from "../src/lib/sectionGroups.js";
 import {
   buildRoutine,
   findDuplicateCourseSelections,
@@ -216,5 +222,40 @@ const sameStartGroups = groupSectionsBySchedule([
   },
 ]);
 assert.deepEqual(sameStartGroups.map((group) => group.courses[0].courseCode), ["CSE361.12", "CSE382.6"]);
+
+const filterCourses = [
+  {
+    courseCode: "CSE361.12",
+    meetings: [
+      { day: "MON", start: "08:30", end: "09:50", room: "SEU509" },
+      { day: "WED", start: "08:30", end: "09:50", room: "SEU509" },
+    ],
+  },
+  {
+    courseCode: "CSE382.6",
+    meetings: [{ day: "SAT", start: "8:00", end: "10:00", room: "SEU610" }],
+  },
+  {
+    courseCode: "CSE443.7",
+    meetings: [
+      { day: "SUN", start: "13:30", end: "14:50", room: "SEU509" },
+      { day: "TUE", start: "13:30", end: "14:50", room: "SEU509" },
+    ],
+  },
+];
+assert.equal(dayPatternKey(filterCourses[0].meetings), "MON|WED");
+assert.deepEqual(getDayPatternOptions(filterCourses), [
+  { value: "SAT", label: "Saturday" },
+  { value: "MON|WED", label: "Monday - Wednesday" },
+  { value: "SUN|TUE", label: "Sunday - Tuesday" },
+]);
+assert.deepEqual(getTimeSlotOptions(filterCourses), [
+  { value: "08:00|10:00", label: "08:00 - 10:00" },
+  { value: "08:30|09:50", label: "08:30 - 09:50" },
+  { value: "13:30|14:50", label: "13:30 - 14:50" },
+]);
+assert.equal(matchesScheduleFilters(filterCourses[0], "MON|WED", "08:30|09:50"), true);
+assert.equal(matchesScheduleFilters(filterCourses[0], "MON", "08:30|09:50"), false);
+assert.equal(matchesScheduleFilters(filterCourses[2], "SUN|TUE", "08:30|09:50"), false);
 
 console.log("Parser and conflict checks passed.");

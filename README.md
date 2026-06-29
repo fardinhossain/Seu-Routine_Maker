@@ -50,6 +50,7 @@ No account, backend, or external database is required. The app is designed for b
 - Store parsed data in browser `localStorage`.
 - Type multiple section codes using commas, spaces, or new lines.
 - Search saved sections by code or course title.
+- Filter organizer sections by exact time slot and single or combined meeting days.
 - Upload PNG, JPG, or WebP screenshots and detect course codes with browser-based OCR.
 - Generate the routine automatically—there is no Generate button.
 - Display all seven days: SAT, SUN, MON, TUE, WED, THU, and FRI.
@@ -81,7 +82,18 @@ Use this method with the UMS **Offered Sections** page.
 9. Add section codes using either option:
    - Type or paste codes such as `CSE361.3`, one per line or separated by commas.
    - Use **Search saved sections** and select a result.
+   - Open **Magic Organizer** to browse and filter all parsed sections visually.
 10. The weekly routine updates automatically.
+
+### Using the Magic Organizer filters
+
+The organizer filters can be combined to narrow the section list:
+
+1. Use **Filter by course** and **Filter by teacher** to limit the available sections.
+2. Use **Time Slot** to select an exact class range, such as `08:30 - 09:50`.
+3. Use **Day of Week** to select an exact single-day or combined-day schedule, such as **Sunday - Tuesday**.
+4. Use the violet arrow button to collapse or expand the filter controls.
+5. Select **Clear** to reset the search field and every active filter at once.
 
 ### Method 2: After successfully completing course advising
 

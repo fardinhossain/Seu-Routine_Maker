@@ -6,12 +6,14 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  ChevronsDown,
+  ChevronsUp,
   CircleHelp,
   Clock3,
   Copy,
   Eraser,
   Eye,
-  Filter,
+  FilterX,
   Search,
   Sparkles,
   UserRound,
@@ -19,13 +21,17 @@ import {
   X,
 } from "lucide-react";
 import RoutineTable from "./RoutineTable";
-import { groupSectionsBySchedule } from "../lib/sectionGroups";
+import {
+  getDayPatternOptions,
+  getTimeSlotOptions,
+  groupSectionsBySchedule,
+  matchesScheduleFilters,
+} from "../lib/sectionGroups";
 import {
   buildRoutine,
   courseIdentity,
   formatTime12,
   uniqueCourseSelections,
-  WEEK_DAYS,
 } from "../lib/routine";
 import { readStoredValue, STORAGE_KEYS, writeStoredValue } from "../lib/storage";
 
@@ -60,10 +66,14 @@ export default function SectionOrganizerPage() {
   const [selectedCodes, setSelectedCodes] = useState(initial.selected);
   const [search, setSearch] = useState("");
   const [dayFilter, setDayFilter] = useState("ALL");
+  const [dayMenuOpen, setDayMenuOpen] = useState(false);
+  const [timeFilter, setTimeFilter] = useState("ALL");
+  const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [courseFilter, setCourseFilter] = useState("ALL");
   const [courseMenuOpen, setCourseMenuOpen] = useState(false);
   const [teacherFilter, setTeacherFilter] = useState("ALL");
   const [teacherMenuOpen, setTeacherMenuOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
   const [showInstructions, setShowInstructions] = useState(false);
@@ -72,6 +82,8 @@ export default function SectionOrganizerPage() {
   const [showRoutinePreview, setShowRoutinePreview] = useState(false);
 
   const allGroups = useMemo(() => groupSectionsBySchedule(courses), [courses]);
+  const dayOptions = useMemo(() => getDayPatternOptions(courses), [courses]);
+  const timeOptions = useMemo(() => getTimeSlotOptions(courses), [courses]);
   const courseOptions = useMemo(() => {
     const options = new Map();
     courses.forEach((course) => {
@@ -108,17 +120,23 @@ export default function SectionOrganizerPage() {
             || (course.facultyName || "").toLowerCase().includes(term))
           && (courseFilter === "ALL" || courseIdentity(course.courseCode) === courseFilter)
           && (teacherFilter === "ALL" || course.faculty === teacherFilter)
-          && (dayFilter === "ALL" || course.meetings.some((meeting) => meeting.day === dayFilter)),
+          && matchesScheduleFilters(course, dayFilter, timeFilter),
         ),
       }))
       .filter((group) => group.courses.length > 0);
-  }, [allGroups, courseFilter, dayFilter, search, teacherFilter]);
+  }, [allGroups, courseFilter, dayFilter, search, teacherFilter, timeFilter]);
   const selectedCourseTitle = courseFilter === "ALL"
     ? "All courses"
     : `${courseFilter} — ${courseOptions.find(([code]) => code === courseFilter)?.[1] || "Course"}`;
   const selectedTeacherTitle = teacherFilter === "ALL"
     ? "All teachers"
     : teacherOptions.find(([faculty]) => faculty === teacherFilter)?.[1] || teacherFilter;
+  const selectedTimeTitle = timeFilter === "ALL"
+    ? "All"
+    : timeOptions.find((option) => option.value === timeFilter)?.label || "All";
+  const selectedDayTitle = dayFilter === "ALL"
+    ? "All"
+    : dayOptions.find((option) => option.value === dayFilter)?.label || "All";
 
   const selectedCourses = useMemo(() => {
     const lookup = new Map(courses.map((course) => [course.courseCode, course]));
@@ -130,6 +148,29 @@ export default function SectionOrganizerPage() {
     [routine.conflicts],
   );
   const generatedCodes = selectedCodes.join("\n");
+  const activeFilterCount = [
+    search.trim(),
+    courseFilter !== "ALL",
+    teacherFilter !== "ALL",
+    timeFilter !== "ALL",
+    dayFilter !== "ALL",
+  ].filter(Boolean).length;
+
+  function closeFilterMenus() {
+    setCourseMenuOpen(false);
+    setTeacherMenuOpen(false);
+    setTimeMenuOpen(false);
+    setDayMenuOpen(false);
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setCourseFilter("ALL");
+    setTeacherFilter("ALL");
+    setTimeFilter("ALL");
+    setDayFilter("ALL");
+    closeFilterMenus();
+  }
 
   useEffect(() => {
     if (!showRoutinePreview) return undefined;
@@ -290,7 +331,8 @@ export default function SectionOrganizerPage() {
               <ol className="grid gap-3 text-sm leading-6 text-slate-400 sm:grid-cols-2 xl:grid-cols-4">
                 <li className="rounded-xl border border-white/[.07] bg-white/[.025] p-3.5">
                   <span className="font-mono text-xs font-bold text-mint-400">01</span>
-                  <p className="mt-1.5"><strong className="text-slate-200">Filter the list.</strong> Choose a course, narrow it by teacher, and use the day filter to find suitable schedules.</p>
+                  <p className="mt-1.5"><strong className="text-slate-200">Filter the list.</strong> Choose a course or teacher, then select an exact <strong className="text-slate-300">Time Slot</strong> or a single/combined <strong className="text-slate-300">Day of Week</strong>. Filters work together.</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Use the violet arrow to collapse the controls, or <strong className="text-violet-300">Clear</strong> to reset search and every filter.</p>
                 </li>
                 <li className="rounded-xl border border-white/[.07] bg-white/[.025] p-3.5">
                   <span className="font-mono text-xs font-bold text-mint-400">02</span>
@@ -310,7 +352,39 @@ export default function SectionOrganizerPage() {
         </section>
 
         <section className="panel mt-3 min-w-0 p-3 sm:p-5">
-          <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_250px_250px_auto] xl:items-end">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 sm:mb-4">
+            <div>
+              <p className="text-sm font-semibold text-white">Filter sections</p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                {activeFilterCount ? `${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}` : "Showing every available section"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setFiltersOpen((current) => !current);
+                  closeFilterMenus();
+                }}
+                className="grid h-10 w-10 place-items-center rounded-full border border-violet-400/30 bg-violet-400/15 text-violet-200 transition hover:border-violet-300/50 hover:bg-violet-400/25 hover:text-white sm:h-11 sm:w-11"
+                aria-label={filtersOpen ? "Collapse filters" : "Expand filters"}
+                aria-expanded={filtersOpen}
+                aria-controls="organizer-filters"
+              >
+                {filtersOpen ? <ChevronsUp size={20} /> : <ChevronsDown size={20} />}
+              </button>
+              <button
+                type="button"
+                onClick={clearFilters}
+                disabled={!activeFilterCount}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/15 px-4 text-sm font-semibold text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:h-11 sm:px-5"
+              >
+                <FilterX size={17} /> Clear
+              </button>
+            </div>
+          </div>
+
+          {filtersOpen && <div id="organizer-filters" className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_minmax(190px,1fr)_minmax(180px,1fr)_170px_190px] xl:items-end">
             <label className="block min-w-0">
               <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Search size={14} /> Search sections</span>
               <input
@@ -327,6 +401,8 @@ export default function SectionOrganizerPage() {
                 onClick={() => {
                   setCourseMenuOpen((current) => !current);
                   setTeacherMenuOpen(false);
+                  setTimeMenuOpen(false);
+                  setDayMenuOpen(false);
                 }}
                 className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${courseMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by course"
@@ -378,6 +454,8 @@ export default function SectionOrganizerPage() {
                 onClick={() => {
                   setTeacherMenuOpen((current) => !current);
                   setCourseMenuOpen(false);
+                  setTimeMenuOpen(false);
+                  setDayMenuOpen(false);
                 }}
                 className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${teacherMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by teacher"
@@ -420,26 +498,109 @@ export default function SectionOrganizerPage() {
                 </div>
               )}
             </div>
-            <div className="md:col-span-2 xl:col-span-1">
-              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Filter size={14} /> Filter by day</span>
-              <div className="grid w-full min-w-0 grid-cols-4 gap-1.5 sm:flex sm:max-w-full sm:overflow-x-auto sm:overscroll-x-contain sm:pb-2">
-                {["ALL", ...WEEK_DAYS].map((day) => (
-                  <button
-                    type="button"
-                    key={day}
-                    onClick={() => setDayFilter(day)}
-                    className={`min-w-0 rounded-lg border px-1 py-2 text-[11px] font-semibold transition sm:shrink-0 sm:px-2.5 sm:text-xs ${
-                      dayFilter === day
-                        ? "border-mint-400/40 bg-mint-400/15 text-mint-300"
-                        : "border-white/[.08] bg-white/[.025] text-slate-500 hover:text-slate-200"
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
+            <div className="relative min-w-0">
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Clock3 size={14} /> Time Slot</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setTimeMenuOpen((current) => !current);
+                  setCourseMenuOpen(false);
+                  setTeacherMenuOpen(false);
+                  setDayMenuOpen(false);
+                }}
+                className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${timeMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                aria-label="Filter sections by time slot"
+                aria-haspopup="listbox"
+                aria-expanded={timeMenuOpen}
+              >
+                <span className="min-w-0 truncate text-slate-200">{selectedTimeTitle}</span>
+                <ChevronDown size={16} className={`shrink-0 text-slate-500 transition-transform ${timeMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {timeMenuOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Time slots"
+                  className="absolute left-0 right-0 z-40 mt-2 max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-ink-900 p-1.5 shadow-2xl shadow-black/50"
+                >
+                  {[{ value: "ALL", label: "All" }, ...timeOptions].map((option) => {
+                    const active = timeFilter === option.value;
+                    return (
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        key={option.value}
+                        onClick={() => {
+                          setTimeFilter(option.value);
+                          setTimeMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                          active
+                            ? "bg-mint-400/15 text-mint-200"
+                            : "text-slate-300 hover:bg-white/[.06] hover:text-white"
+                        }`}
+                      >
+                        <span>{option.label}</span>
+                        {active && <Check size={15} className="shrink-0 text-mint-300" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
+            <div className="relative min-w-0">
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><CalendarDays size={14} /> Day of Week</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDayMenuOpen((current) => !current);
+                  setCourseMenuOpen(false);
+                  setTeacherMenuOpen(false);
+                  setTimeMenuOpen(false);
+                }}
+                className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${dayMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                aria-label="Filter sections by day of week"
+                aria-haspopup="listbox"
+                aria-expanded={dayMenuOpen}
+              >
+                <span className="min-w-0 truncate text-slate-200">{selectedDayTitle}</span>
+                <ChevronDown size={16} className={`shrink-0 text-slate-500 transition-transform ${dayMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {dayMenuOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Meeting days"
+                  className="absolute left-0 right-0 z-40 mt-2 max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-ink-900 p-1.5 shadow-2xl shadow-black/50"
+                >
+                  {[{ value: "ALL", label: "All" }, ...dayOptions].map((option) => {
+                    const active = dayFilter === option.value;
+                    return (
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        key={option.value}
+                        onClick={() => {
+                          setDayFilter(option.value);
+                          setDayMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                          active
+                            ? "bg-mint-400/15 text-mint-200"
+                            : "text-slate-300 hover:bg-white/[.06] hover:text-white"
+                        }`}
+                      >
+                        <span className="min-w-0 break-words">{option.label}</span>
+                        {active && <Check size={15} className="shrink-0 text-mint-300" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>}
           <div className="mt-3 grid min-w-0 grid-cols-3 gap-1.5 text-center text-[10px] text-slate-500 sm:mt-4 sm:flex sm:flex-wrap sm:gap-2 sm:text-left sm:text-xs">
             <span className="min-w-0 rounded-full bg-white/[.035] px-1.5 py-1"><strong className="font-medium">{courses.length}</strong> <span className="sm:hidden">Sections</span><span className="hidden sm:inline">sections</span></span>
             <span className="min-w-0 rounded-full bg-white/[.035] px-1.5 py-1"><strong className="font-medium">{allGroups.length}</strong> <span className="sm:hidden">Groups</span><span className="hidden sm:inline">schedule groups</span></span>
@@ -520,7 +681,7 @@ export default function SectionOrganizerPage() {
 
             {!visibleGroups.length && (
               <div className="rounded-2xl border border-dashed border-white/10 px-5 py-14 text-center text-sm text-slate-500">
-                No sections match this search and day filter.
+                No sections match the selected filters.
               </div>
             )}
           </section>

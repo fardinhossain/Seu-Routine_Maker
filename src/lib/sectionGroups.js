@@ -1,9 +1,24 @@
 import { timeToMinutes, WEEK_DAYS } from "./routine.js";
 
 const dayOrder = new Map(WEEK_DAYS.map((day, index) => [day, index]));
+const filterDayOrder = new Map(["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day, index) => [day, index]));
+const dayNames = {
+  SAT: "Saturday",
+  SUN: "Sunday",
+  MON: "Monday",
+  TUE: "Tuesday",
+  WED: "Wednesday",
+  THU: "Thursday",
+  FRI: "Friday",
+};
 
 function isLabCourse(course) {
   return /\blab(?:oratory)?\b/i.test(course.courseTitle || "");
+}
+
+function normalizeTime24(time) {
+  const [hours, minutes = "00"] = String(time).split(":");
+  return `${String(Number(hours)).padStart(2, "0")}:${minutes.padStart(2, "0")}`;
 }
 
 function normalizedMeetings(course) {
@@ -14,6 +29,70 @@ function normalizedMeetings(course) {
       || timeToMinutes(left.start) - timeToMinutes(right.start)
       || timeToMinutes(left.end) - timeToMinutes(right.end),
     );
+}
+
+export function dayPatternKey(meetings = []) {
+  return [...new Set(meetings.map((meeting) => meeting.day))]
+    .sort((left, right) => (dayOrder.get(left) ?? 99) - (dayOrder.get(right) ?? 99))
+    .join("|");
+}
+
+export function timeSlotKey(meeting) {
+  return `${normalizeTime24(meeting.start)}|${normalizeTime24(meeting.end)}`;
+}
+
+export function getDayPatternOptions(courses = []) {
+  const options = new Map();
+
+  courses.forEach((course) => {
+    const value = dayPatternKey(course.meetings);
+    if (!value || options.has(value)) return;
+    options.set(value, value.split("|").map((day) => dayNames[day] || day).join(" - "));
+  });
+
+  return [...options.entries()]
+    .map(([value, label]) => ({ value, label }))
+    .sort((left, right) => {
+      const leftDays = left.value.split("|");
+      const rightDays = right.value.split("|");
+      return leftDays.length - rightDays.length
+        || (filterDayOrder.get(leftDays[0]) ?? 99) - (filterDayOrder.get(rightDays[0]) ?? 99)
+        || left.label.localeCompare(right.label);
+    });
+}
+
+export function getTimeSlotOptions(courses = []) {
+  const options = new Map();
+
+  courses.forEach((course) => {
+    course.meetings.forEach((meeting) => {
+      const value = timeSlotKey(meeting);
+      if (!options.has(value)) {
+        const start = normalizeTime24(meeting.start);
+        const end = normalizeTime24(meeting.end);
+        options.set(value, {
+          value,
+          label: `${start} - ${end}`,
+          start,
+          end,
+        });
+      }
+    });
+  });
+
+  return [...options.values()]
+    .sort((left, right) =>
+      timeToMinutes(left.start) - timeToMinutes(right.start)
+      || timeToMinutes(left.end) - timeToMinutes(right.end),
+    )
+    .map(({ value, label }) => ({ value, label }));
+}
+
+export function matchesScheduleFilters(course, dayFilter = "ALL", timeFilter = "ALL") {
+  const matchesDay = dayFilter === "ALL" || dayPatternKey(course.meetings) === dayFilter;
+  const matchesTime = timeFilter === "ALL"
+    || course.meetings.some((meeting) => timeSlotKey(meeting) === timeFilter);
+  return matchesDay && matchesTime;
 }
 
 export function scheduleGroupKey(course) {

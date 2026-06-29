@@ -355,7 +355,7 @@ export default function App() {
                   <span className="font-mono text-[10px] font-bold text-slate-600">05</span>
                 </div>
                 <p className="text-sm font-semibold text-slate-100">Open Magic Organizer</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Filter by <strong className="text-slate-300">course, teacher, or day</strong>, then select one section for each course. Duplicate and conflicting choices show a warning.</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Filter by <strong className="text-slate-300">course, teacher, exact time slot, or meeting days</strong>. Combined-day schedules are supported, and the violet Clear button resets every filter.</p>
               </div>
 
               <div className="rounded-2xl border border-white/[.08] bg-ink-950/45 p-4">
