@@ -384,7 +384,7 @@ export default function SectionOrganizerPage() {
             </div>
           </div>
 
-          {filtersOpen && <div id="organizer-filters" className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_minmax(190px,1fr)_minmax(180px,1fr)_170px_190px] xl:items-end">
+          {filtersOpen && <div id="organizer-filters" className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_minmax(190px,1fr)_minmax(180px,1fr)_230px_210px] xl:items-end">
             <label className="block min-w-0">
               <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Search size={14} /> Search sections</span>
               <input
@@ -521,7 +521,7 @@ export default function SectionOrganizerPage() {
                 <div
                   role="listbox"
                   aria-label="Time slots"
-                  className="absolute left-0 right-0 z-40 mt-2 max-h-72 overflow-y-auto rounded-xl border border-white/10 bg-ink-900 p-1.5 shadow-2xl shadow-black/50"
+                  className="absolute left-0 z-40 mt-2 max-h-72 w-max min-w-full max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-white/10 bg-ink-900 p-1.5 shadow-2xl shadow-black/50"
                 >
                   {[{ value: "ALL", label: "All" }, ...timeOptions].map((option) => {
                     const active = timeFilter === option.value;
@@ -541,7 +541,7 @@ export default function SectionOrganizerPage() {
                             : "text-slate-300 hover:bg-white/[.06] hover:text-white"
                         }`}
                       >
-                        <span>{option.label}</span>
+                        <span className="whitespace-nowrap">{option.label}</span>
                         {active && <Check size={15} className="shrink-0 text-mint-300" />}
                       </button>
                     );
