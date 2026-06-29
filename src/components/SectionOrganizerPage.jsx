@@ -237,7 +237,7 @@ export default function SectionOrganizerPage() {
   }
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-ink-950 text-slate-200">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-ink-950 font-sans text-slate-200">
       <header className="border-b border-white/[.06] bg-ink-950/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
           <a href="#" className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-white">
@@ -268,16 +268,16 @@ export default function SectionOrganizerPage() {
           <button
             type="button"
             onClick={() => setShowInstructions((current) => !current)}
-            className="flex w-full min-w-0 items-center gap-2.5 px-3 py-3.5 text-left transition hover:bg-white/[.025] sm:gap-3 sm:px-5 sm:py-4"
+            className="flex w-full min-w-0 items-center gap-2 px-3 py-3 text-left transition hover:bg-white/[.025] sm:gap-3 sm:px-5 sm:py-4"
             aria-expanded={showInstructions}
             aria-controls="organizer-instructions"
           >
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-mint-400/10 text-mint-300 sm:h-9 sm:w-9 sm:rounded-xl">
-              <CircleHelp size={18} />
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-mint-400/10 text-mint-300 sm:h-9 sm:w-9 sm:rounded-xl">
+              <CircleHelp size={16} className="sm:h-[18px] sm:w-[18px]" />
             </span>
             <span className="min-w-0 flex-1">
-              <strong className="block text-sm font-semibold text-white">How to select sections</strong>
-              <span className="mt-0.5 block text-xs text-slate-500">Open the quick selection guide</span>
+              <strong className="block truncate text-xs font-semibold text-white sm:text-sm">How to select sections</strong>
+              <span className="mt-0.5 hidden text-xs text-slate-500 sm:block">Open the quick selection guide</span>
             </span>
             <ChevronDown
               size={18}
@@ -309,26 +309,26 @@ export default function SectionOrganizerPage() {
           )}
         </section>
 
-        <section className="panel mt-3 p-4 sm:p-5">
+        <section className="panel mt-3 min-w-0 p-3 sm:p-5">
           <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,1fr)_250px_250px_auto] xl:items-end">
             <label className="block min-w-0">
-              <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><Search size={14} /> Search sections</span>
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Search size={14} /> Search sections</span>
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="field text-base sm:text-sm"
+                className="field px-3 py-2.5 text-base sm:text-sm"
                 placeholder="Search by code, title, or faculty…"
               />
             </label>
             <div className="relative min-w-0">
-              <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><BookOpen size={14} /> Filter by course</span>
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><BookOpen size={14} /> Filter by course</span>
               <button
                 type="button"
                 onClick={() => {
                   setCourseMenuOpen((current) => !current);
                   setTeacherMenuOpen(false);
                 }}
-                className={`field flex w-full items-center justify-between gap-3 text-left text-base sm:text-sm ${courseMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${courseMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by course"
                 aria-haspopup="listbox"
                 aria-expanded={courseMenuOpen}
@@ -372,14 +372,14 @@ export default function SectionOrganizerPage() {
               )}
             </div>
             <div className="relative min-w-0">
-              <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><UserRound size={14} /> Filter by teacher</span>
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><UserRound size={14} /> Filter by teacher</span>
               <button
                 type="button"
                 onClick={() => {
                   setTeacherMenuOpen((current) => !current);
                   setCourseMenuOpen(false);
                 }}
-                className={`field flex w-full items-center justify-between gap-3 text-left text-base sm:text-sm ${teacherMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
+                className={`field flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-base sm:text-sm ${teacherMenuOpen ? "border-mint-400/50 ring-2 ring-mint-400/10" : ""}`}
                 aria-label="Filter sections by teacher"
                 aria-haspopup="listbox"
                 aria-expanded={teacherMenuOpen}
@@ -421,14 +421,14 @@ export default function SectionOrganizerPage() {
               )}
             </div>
             <div className="md:col-span-2 xl:col-span-1">
-              <span className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400"><Filter size={14} /> Filter by day</span>
-              <div className="flex w-full min-w-0 max-w-full gap-1.5 overflow-x-auto overscroll-x-contain pb-2">
+              <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-slate-400 sm:mb-2 sm:gap-2 sm:text-xs"><Filter size={14} /> Filter by day</span>
+              <div className="grid w-full min-w-0 grid-cols-4 gap-1.5 sm:flex sm:max-w-full sm:overflow-x-auto sm:overscroll-x-contain sm:pb-2">
                 {["ALL", ...WEEK_DAYS].map((day) => (
                   <button
                     type="button"
                     key={day}
                     onClick={() => setDayFilter(day)}
-                    className={`shrink-0 rounded-lg border px-2.5 py-2 text-xs font-semibold transition ${
+                    className={`min-w-0 rounded-lg border px-1 py-2 text-[11px] font-semibold transition sm:shrink-0 sm:px-2.5 sm:text-xs ${
                       dayFilter === day
                         ? "border-mint-400/40 bg-mint-400/15 text-mint-300"
                         : "border-white/[.08] bg-white/[.025] text-slate-500 hover:text-slate-200"
@@ -440,10 +440,10 @@ export default function SectionOrganizerPage() {
               </div>
             </div>
           </div>
-          <div className="mt-3 flex min-w-0 flex-wrap gap-1.5 text-[11px] text-slate-500 sm:mt-4 sm:gap-2 sm:text-xs">
-            <span className="rounded-full bg-white/[.035] px-2.5 py-1">{courses.length} sections</span>
-            <span className="rounded-full bg-white/[.035] px-2.5 py-1">{allGroups.length} schedule groups</span>
-            <span className="rounded-full bg-mint-400/[.07] px-2.5 py-1 text-mint-300">{selectedCodes.length} selected</span>
+          <div className="mt-3 grid min-w-0 grid-cols-3 gap-1.5 text-center text-[10px] text-slate-500 sm:mt-4 sm:flex sm:flex-wrap sm:gap-2 sm:text-left sm:text-xs">
+            <span className="min-w-0 rounded-full bg-white/[.035] px-1.5 py-1"><strong className="font-medium">{courses.length}</strong> <span className="sm:hidden">Sections</span><span className="hidden sm:inline">sections</span></span>
+            <span className="min-w-0 rounded-full bg-white/[.035] px-1.5 py-1"><strong className="font-medium">{allGroups.length}</strong> <span className="sm:hidden">Groups</span><span className="hidden sm:inline">schedule groups</span></span>
+            <span className="min-w-0 rounded-full bg-mint-400/[.07] px-1.5 py-1 text-mint-300"><strong className="font-medium">{selectedCodes.length}</strong> selected</span>
           </div>
         </section>
 
