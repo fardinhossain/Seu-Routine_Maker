@@ -258,4 +258,28 @@ assert.equal(matchesScheduleFilters(filterCourses[0], "MON|WED", "08:30|09:50"),
 assert.equal(matchesScheduleFilters(filterCourses[0], "MON", "08:30|09:50"), false);
 assert.equal(matchesScheduleFilters(filterCourses[2], "SUN|TUE", "08:30|09:50"), false);
 
+assert.deepEqual(
+  extractCourseCodesFromOcr(
+    [
+      "Advised Sections",
+      "# Code Credits Faculty",
+      "1 CSE361.6 3 N/A",
+      "2 CSE362 2 1 N/A",
+      "3 CSE38I.I 3 N/A",
+      "4 CSE382,1 1 N/A",
+      "5 CSE443.3 3 N/A",
+      "6 CSE44A.3 1 N/A",
+    ].join("\n"),
+    [
+      { courseCode: "CSE361.6" },
+      { courseCode: "CSE362.2" },
+      { courseCode: "CSE381.1" },
+      { courseCode: "CSE382.1" },
+      { courseCode: "CSE443.3" },
+      { courseCode: "CSE444.3" },
+    ],
+  ),
+  ["CSE361.6", "CSE362.2", "CSE381.1", "CSE382.1", "CSE443.3", "CSE444.3"],
+);
+
 console.log("Parser and conflict checks passed.");

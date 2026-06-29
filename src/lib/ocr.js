@@ -2,6 +2,35 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function fuzzyChar(ch) {
+  const c = ch.toUpperCase();
+  if (c === "0") return "[0OQ]";
+  if (c === "1") return "[1IL|i!\\]\\[]";
+  if (c === "2") return "[2Zz]";
+  if (c === "3") return "[3EB]";
+  if (c === "4") return "[4A]";
+  if (c === "5") return "[5Ss]";
+  if (c === "6") return "[6bG]";
+  if (c === "7") return "[7T]";
+  if (c === "8") return "[8B]";
+  if (c === "9") return "[9gq]";
+  if (c === "O") return "[O0Q]";
+  if (c === "I") return "[I1L|]";
+  if (c === "L") return "[L1I|]";
+  if (c === "S") return "[S5]";
+  if (c === "Z") return "[Z2]";
+  if (c === "B") return "[B83]";
+  if (c === "G") return "[G6Cc]";
+  if (c === "E") return "[E3]";
+  if (c === "A") return "[A4]";
+  if (c === "T") return "[T7]";
+  return escapeRegExp(c);
+}
+
+function fuzzyPart(str) {
+  return [...str].map(fuzzyChar).join("[\\s._-]?");
+}
+
 export function extractCourseCodesFromOcr(text = "", courses = []) {
   const source = text
     .toUpperCase()
@@ -38,7 +67,7 @@ export function extractCourseCodesFromOcr(text = "", courses = []) {
 
     const [, prefix, number, section] = match;
     const pattern = new RegExp(
-      `\\b${escapeRegExp(prefix)}\\s*${escapeRegExp(number)}\\s*[.,:]\\s*${escapeRegExp(section)}\\b`,
+      `(?:^|[^A-Z])${fuzzyPart(prefix)}\\s*${fuzzyPart(number)}(?:\\s*(?:[.,:;\\-_/'"~\\|]|SEC(?:TION)?|S)?\\s*)${fuzzyPart(section)}(?:$|[^0-9A-Z])`,
       "i",
     );
     const result = pattern.exec(source);
