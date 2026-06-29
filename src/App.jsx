@@ -25,7 +25,7 @@ import LoadingScreen from "./components/LoadingScreen";
 import RoutineTable from "./components/RoutineTable";
 import ShortNameEditor from "./components/ShortNameEditor";
 import { parseUmsHtml } from "./lib/parser";
-import { buildRoutine, findDuplicateCourseSelections, parseCodeList, uniqueCourseSelections } from "./lib/routine";
+import { buildRoutine, courseIdentity, findDuplicateCourseSelections, parseCodeList, uniqueCourseSelections } from "./lib/routine";
 import { clearRoutineStorage, readStoredValue, STORAGE_KEYS, writeStoredValue } from "./lib/storage";
 
 function loadInitialState() {
@@ -71,6 +71,24 @@ export default function App() {
     const available = new Set(courses.map((course) => course.courseCode.toUpperCase()));
     return parseCodeList(codeInput).filter((code) => !available.has(code));
   }, [codeInput, courses]);
+  const missingCodeSuggestions = useMemo(() => {
+    const suggestions = {};
+    const availableByCourse = new Map();
+
+    courses.forEach((course) => {
+      const identity = courseIdentity(course.courseCode);
+      if (identity && !availableByCourse.has(identity)) {
+        availableByCourse.set(identity, course.courseCode);
+      }
+    });
+
+    missingDraftCodes.forEach((code) => {
+      const suggestion = availableByCourse.get(courseIdentity(code));
+      if (suggestion) suggestions[code] = suggestion;
+    });
+
+    return suggestions;
+  }, [courses, missingDraftCodes]);
   const duplicateSelections = useMemo(
     () => findDuplicateCourseSelections(parseCodeList(codeInput)),
     [codeInput],
@@ -135,10 +153,14 @@ export default function App() {
     window.setTimeout(() => {
       try {
         const parsed = parseUmsHtml(htmlToParse);
+        const sourceType = parsed.parseDebug?.sourceType || parsed[0]?.sourceType || "offered-sections";
         setCourses(parsed);
         writeStoredValue(STORAGE_KEYS.rawHtml, htmlToParse);
         writeStoredValue(STORAGE_KEYS.courses, parsed);
         setImportSuccessMessage(`${parsed.length} course sections parsed and saved in this browser.`);
+        if (sourceType === "dashboard-registered-courses") {
+          showMessage("warning", "Dashboard Registered Courses page detected. Routine generated from registered courses.");
+        }
       } catch (error) {
         showMessage("error", error.message || "The HTML could not be parsed.");
       } finally {
@@ -438,6 +460,7 @@ export default function App() {
             conflicts={draftConflicts}
             duplicateSelections={duplicateSelections}
             missingCodes={courses.length ? missingDraftCodes : []}
+            missingSuggestions={missingCodeSuggestions}
             imageResetKey={imageResetKey}
             onClear={handleClear}
             onReset={handleReset}

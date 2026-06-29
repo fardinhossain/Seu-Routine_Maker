@@ -62,6 +62,60 @@ const mhtml = [
 assert.match(extractHtmlPayload(mhtml), /ums-grid-offered-section/);
 assert.deepEqual(parseUmsHtml(mhtml), courses);
 
+const dashboardHtml = `
+  <main>
+    <section>
+      <h2>Registered Courses</h2>
+      <div class="student-count grid items-center">
+        <div>
+          <div>CSE443.3</div>
+          <div>Computer Graphics &amp; Animation</div>
+        </div>
+        <div><div>[MHSU] Mahjabin Sultana</div></div>
+        <div>
+          <div>MON # 13:30 ~ 14:50 @ SEU213B</div>
+          <div>WED # 13:30 ~ 14:50 @ SEU213B</div>
+        </div>
+      </div>
+      <div class="student-count grid items-center">
+        <div>
+          <div>CSE361.6</div>
+          <div>Operating Systems</div>
+        </div>
+        <div><div>[MRRR] Mst Rubaiya Raktin Raha</div></div>
+        <div>
+          <div>SUN # 13:30 ~ 14:50 @ SEU516</div>
+          <div>TUE # 13:30 ~ 14:50 @ SEU516</div>
+        </div>
+      </div>
+    </section>
+  </main>`;
+
+const dashboardCourses = parseUmsHtml(dashboardHtml);
+assert.equal(dashboardCourses.parseDebug.sourceType, "dashboard-registered-courses");
+assert.equal(dashboardCourses.parseDebug.courseSectionCodesFound, 2);
+assert.equal(dashboardCourses.parseDebug.scheduleLinesFound, 4);
+assert.deepEqual(dashboardCourses.map((course) => course.courseCode), ["CSE361.6", "CSE443.3"]);
+
+const dashboardOs = dashboardCourses.find((course) => course.courseCode === "CSE361.6");
+assert.equal(dashboardOs.sectionCode, "CSE361.6");
+assert.equal(dashboardOs.baseCourseCode, "CSE361");
+assert.equal(dashboardOs.section, "6");
+assert.equal(dashboardOs.courseTitle, "Operating Systems");
+assert.equal(dashboardOs.shortName, "OS");
+assert.equal(dashboardOs.teacherInitial, "MRRR");
+assert.equal(dashboardOs.teacherName, "Mst Rubaiya Raktin Raha");
+assert.deepEqual(dashboardOs.schedules, [
+  { day: "SUN", start: "13:30", end: "14:50", room: "SEU516" },
+  { day: "TUE", start: "13:30", end: "14:50", room: "SEU516" },
+]);
+assert.equal(dashboardOs.sourceType, "dashboard-registered-courses");
+
+assert.throws(
+  () => parseUmsHtml("<div>Registered Courses CSE361.6 Operating Systems [MRRR] Mst Rubaiya Raktin Raha</div>"),
+  /Course sections found, but no timetable schedule found\./,
+);
+
 const conflictRoutine = buildRoutine([
   {
     courseCode: "CSE361.3",
@@ -113,6 +167,7 @@ assert.deepEqual(uniqueCourseSelections(repeatedCourseCodes), ["CSE361.6", "CSE4
 assert.deepEqual(findDuplicateCourseSelections(repeatedCourseCodes), [
   { course: "CSE362", sections: ["CSE362.4", "CSE362.3"] },
 ]);
+assert.deepEqual(parseCodeList("cse361.6 CSE361 . 6 CSE443,3"), ["CSE361.6", "CSE443.3"]);
 
 assert.deepEqual(
   extractCourseCodesFromOcr("Selected: CSE 361.3, CSE443,4 and CSE 444:1", [

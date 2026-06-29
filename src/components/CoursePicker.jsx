@@ -10,6 +10,7 @@ export default function CoursePicker({
   conflicts,
   duplicateSelections,
   missingCodes,
+  missingSuggestions = {},
   imageResetKey,
   onClear,
   onReset,
@@ -172,10 +173,22 @@ export default function CoursePicker({
       {missingCodes.length > 0 && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-400/25 bg-amber-400/[.08] p-3.5 text-xs leading-5 text-amber-200" role="status">
           <AlertCircle className="mt-0.5 shrink-0" size={16} />
-          <p>
-            Section{missingCodes.length === 1 ? "" : "s"} not found:{" "}
-            <strong className="font-mono text-amber-100">{missingCodes.join(", ")}</strong>
-          </p>
+          <div>
+            <p>
+              Section{missingCodes.length === 1 ? "" : "s"} not found:{" "}
+              <strong className="font-mono text-amber-100">{missingCodes.join(", ")}</strong>
+            </p>
+            {missingCodes.map((code) => missingSuggestions[code] && (
+              <button
+                type="button"
+                key={`${code}-${missingSuggestions[code]}`}
+                onClick={() => addCourse(missingSuggestions[code])}
+                className="mt-1 block text-left font-mono text-amber-100 underline decoration-amber-200/40 underline-offset-4 transition hover:text-white"
+              >
+                Did you mean {missingSuggestions[code]}?
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

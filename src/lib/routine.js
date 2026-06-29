@@ -15,17 +15,33 @@ export function formatTime12(time) {
   return `${displayHour}:${minutes} ${period}`;
 }
 
+export function normalizeSectionCode(value = "") {
+  const source = String(value)
+    .toUpperCase()
+    .replace(/[\u00a0\u200B-\u200D\uFEFF]/g, " ")
+    .trim();
+  const match = source.match(/\b([A-Z]{2,6})\s*(\d{2,4})\s*[.,:]\s*(\d{1,3})\b/);
+
+  if (match) return `${match[1]}${match[2]}.${match[3]}`;
+  return source.replace(/\s+/g, "");
+}
+
 export function parseCodeList(value = "") {
+  const source = String(value)
+    .toUpperCase()
+    .replace(/[\u00a0\u200B-\u200D\uFEFF]/g, " ")
+    .replace(/\b([A-Z]{2,6})\s*(\d{2,4})\s*[.,:]\s*(\d{1,3})\b/g, "$1$2.$3");
+
   return [...new Set(
-    value
+    source
       .split(/[\s,;]+/)
-      .map((code) => code.trim().toUpperCase())
+      .map((code) => normalizeSectionCode(code))
       .filter(Boolean),
   )];
 }
 
 export function courseIdentity(code = "") {
-  return code.trim().toUpperCase().split(".")[0];
+  return normalizeSectionCode(code).split(".")[0];
 }
 
 export function uniqueCourseSelections(codes = []) {
