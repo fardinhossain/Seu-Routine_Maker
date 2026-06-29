@@ -365,8 +365,8 @@ export default function App() {
                   </span>
                   <span className="font-mono text-[10px] font-bold text-slate-600">06</span>
                 </div>
-                <p className="text-sm font-semibold text-slate-100">Check your routine</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Click <strong className="text-slate-300">Check Routine</strong>. A new tab opens and scrolls directly to your completed weekly routine.</p>
+                <p className="text-sm font-semibold text-slate-100">Create your routine</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Click <strong className="text-slate-300">Create Routine</strong>. A new tab opens and scrolls directly to your completed weekly routine.</p>
               </div>
             </div>
 

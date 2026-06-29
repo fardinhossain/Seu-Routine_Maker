@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -10,12 +10,15 @@ import {
   Clock3,
   Copy,
   Eraser,
+  Eye,
   Filter,
   Search,
   Sparkles,
   UserRound,
   WandSparkles,
+  X,
 } from "lucide-react";
+import RoutineTable from "./RoutineTable";
 import { groupSectionsBySchedule } from "../lib/sectionGroups";
 import {
   buildRoutine,
@@ -28,11 +31,12 @@ import { readStoredValue, STORAGE_KEYS, writeStoredValue } from "../lib/storage"
 
 function initialOrganizerData() {
   const courses = readStoredValue(STORAGE_KEYS.courses, []);
+  const shortNames = readStoredValue(STORAGE_KEYS.shortNames, {});
   const availableCodes = new Set(courses.map((course) => course.courseCode));
   const selected = uniqueCourseSelections(
     readStoredValue(STORAGE_KEYS.selectedCodes, []).filter((code) => availableCodes.has(code)),
   );
-  return { courses, selected };
+  return { courses, selected, shortNames };
 }
 
 function copyText(value) {
@@ -52,6 +56,7 @@ function copyText(value) {
 export default function SectionOrganizerPage() {
   const initial = useMemo(initialOrganizerData, []);
   const [courses] = useState(initial.courses);
+  const [shortNames] = useState(initial.shortNames);
   const [selectedCodes, setSelectedCodes] = useState(initial.selected);
   const [search, setSearch] = useState("");
   const [dayFilter, setDayFilter] = useState("ALL");
@@ -64,6 +69,7 @@ export default function SectionOrganizerPage() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [pendingReplacement, setPendingReplacement] = useState(null);
   const [pendingConflict, setPendingConflict] = useState(null);
+  const [showRoutinePreview, setShowRoutinePreview] = useState(false);
 
   const allGroups = useMemo(() => groupSectionsBySchedule(courses), [courses]);
   const courseOptions = useMemo(() => {
@@ -124,6 +130,22 @@ export default function SectionOrganizerPage() {
     [routine.conflicts],
   );
   const generatedCodes = selectedCodes.join("\n");
+
+  useEffect(() => {
+    if (!showRoutinePreview) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setShowRoutinePreview(false);
+    };
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [showRoutinePreview]);
 
   function conflictsForCandidate(course, baseCodes = selectedCodes) {
     const lookup = new Map(courses.map((item) => [item.courseCode, item]));
@@ -280,7 +302,7 @@ export default function SectionOrganizerPage() {
                 </li>
                 <li className="rounded-xl border border-white/[.07] bg-white/[.025] p-3.5">
                   <span className="font-mono text-xs font-bold text-mint-400">04</span>
-                  <p className="mt-1.5"><strong className="text-slate-200">Check the result.</strong> Copy the generated codes or click <strong className="text-mint-300">Check Routine</strong> to open your routine in a new tab.</p>
+                  <p className="mt-1.5"><strong className="text-slate-200">Create the result.</strong> Use Quick Preview on this page, copy the generated codes, or click <strong className="text-mint-300">Create Routine</strong> to open your routine in a new tab.</p>
                 </li>
               </ol>
             </div>
@@ -532,16 +554,26 @@ export default function SectionOrganizerPage() {
                 </button>
               </div>
 
-              <a
-                href="#routine"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={prepareRoutineLink}
-                aria-disabled={!selectedCodes.length}
-                className={`primary-button mt-2.5 w-full ${!selectedCodes.length ? "pointer-events-none opacity-50" : ""}`}
-              >
-                <CalendarDays size={16} /> Check Routine
-              </a>
+              <div className="mt-2.5 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRoutinePreview(true)}
+                  disabled={!selectedCodes.length}
+                  className="secondary-button px-2"
+                >
+                  <Eye size={16} /> Quick Preview
+                </button>
+                <a
+                  href="#routine"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={prepareRoutineLink}
+                  aria-disabled={!selectedCodes.length}
+                  className={`primary-button w-full px-2 ${!selectedCodes.length ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  <CalendarDays size={16} /> Create Routine
+                </a>
+              </div>
 
               {routine.conflicts.length > 0 && (
                 <div className="mt-4 rounded-xl border border-rose-400/25 bg-rose-400/[.08] p-3 text-xs text-rose-200">
@@ -561,6 +593,42 @@ export default function SectionOrganizerPage() {
           </aside>
         </div>
       </main>
+
+      {showRoutinePreview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-2 backdrop-blur-sm sm:p-5"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="routine-preview-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowRoutinePreview(false);
+          }}
+        >
+          <section className="flex max-h-[96vh] w-full max-w-[1500px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-950 shadow-2xl shadow-black/70 sm:rounded-3xl">
+            <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/[.08] bg-ink-900 px-4 py-3 sm:px-6 sm:py-4">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[.16em] text-mint-400">Quick Preview</p>
+                <h2 id="routine-preview-title" className="mt-0.5 truncate text-lg font-semibold text-white">Your weekly routine</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRoutinePreview(false)}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[.04] text-slate-400 transition hover:border-rose-400/30 hover:bg-rose-400/10 hover:text-rose-200"
+                aria-label="Close routine preview"
+              >
+                <X size={19} />
+              </button>
+            </header>
+            <div className="min-h-0 flex-1 overflow-y-auto p-2 sm:p-4">
+              <RoutineTable
+                selectedCourses={selectedCourses}
+                routine={routine}
+                shortNames={shortNames}
+              />
+            </div>
+          </section>
+        </div>
+      )}
 
       {pendingReplacement && (
         <div
