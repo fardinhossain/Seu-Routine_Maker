@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, ImageUp, LoaderCircle, ScanText, X } from "lucide-react";
+import { CheckCircle2, ClipboardPaste, ImageUp, LoaderCircle, ScanText, X } from "lucide-react";
 import { extractCourseCodesFromOcr } from "../lib/ocr";
 
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
@@ -66,7 +66,7 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
 
     if (preview) URL.revokeObjectURL(preview);
     setPreview(URL.createObjectURL(file));
-    setFileName(file.name);
+    setFileName(file.name || "Pasted clipboard image");
     setDetectedCodes([]);
     setError("");
     setProgress(2);
@@ -126,6 +126,61 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
     }
   }
 
+  async function pasteFromClipboard() {
+    if (!courses.length) {
+      setError("Please parse your UMS HTML before scanning an image.");
+      return;
+    }
+    if (scanning) return;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.read) {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          const imageType = item.types.find((type) => type.startsWith("image/"));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const file = new File([blob], "Pasted screenshot", { type: imageType });
+            await scanImage(file);
+            return;
+          }
+        }
+        setError("No image found in clipboard. Copy an image screenshot first (e.g. Snipping Tool or Ctrl+C).");
+      } else {
+        setError("Direct clipboard access is restricted in this browser. Press Ctrl+V on your keyboard to paste directly!");
+      }
+    } catch (err) {
+      if (err.name === "NotAllowedError" || err.name === "SecurityError") {
+        setError("Clipboard access was blocked. Please allow permissions or press Ctrl+V to paste directly.");
+      } else {
+        setError("Could not read clipboard. Try pressing Ctrl+V to paste your image directly.");
+      }
+    }
+  }
+
+  useEffect(() => {
+    function handleGlobalPaste(event) {
+      if (!courses.length || scanning) return;
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i += 1) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            const imageFile = new File([file], "Pasted screenshot", { type: file.type });
+            scanImage(imageFile);
+            event.preventDefault();
+            break;
+          }
+        }
+      }
+    }
+
+    window.addEventListener("paste", handleGlobalPaste);
+    return () => window.removeEventListener("paste", handleGlobalPaste);
+  }, [courses, scanning, preview]);
+
   return (
     <div className="mt-4 min-w-0 max-w-full rounded-xl border border-dashed border-white/15 bg-black/10 p-3 sm:rounded-2xl sm:p-3.5">
       <input
@@ -160,7 +215,7 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-slate-200">Pick codes from an image</p>
           <p className="mt-0.5 truncate text-xs text-slate-500">
-            {fileName || "Upload a clear screenshot containing course section codes."}
+            {fileName || "Upload a screenshot or paste an image from clipboard (Ctrl+V)."}
           </p>
           {scanning && (
             <div className="mt-2">
@@ -172,16 +227,29 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
           )}
         </div>
 
-        <button
-          type="button"
-          className="secondary-button shrink-0"
-          disabled={scanning || !courses.length}
-          onClick={() => inputRef.current?.click()}
-          title={courses.length ? "Upload a course screenshot" : "Parse UMS data first"}
-        >
-          {scanning ? <LoaderCircle size={16} className="animate-spin" /> : <ImageUp size={16} />}
-          {scanning ? "Scanning…" : "Upload image"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            className="secondary-button shrink-0"
+            disabled={scanning || !courses.length}
+            onClick={pasteFromClipboard}
+            title={courses.length ? "Paste image from clipboard (Ctrl+V)" : "Parse UMS data first"}
+          >
+            {scanning ? <LoaderCircle size={16} className="animate-spin" /> : <ClipboardPaste size={16} />}
+            {scanning ? "Scanning…" : "Paste image"}
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button shrink-0"
+            disabled={scanning || !courses.length}
+            onClick={() => inputRef.current?.click()}
+            title={courses.length ? "Upload a course screenshot" : "Parse UMS data first"}
+          >
+            {scanning ? <LoaderCircle size={16} className="animate-spin" /> : <ImageUp size={16} />}
+            {scanning ? "Scanning…" : "Upload image"}
+          </button>
+        </div>
       </div>
 
       {detectedCodes.length > 0 && (
@@ -195,7 +263,7 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
       )}
 
       {error && <p className="mt-3 text-xs leading-5 text-rose-300" role="alert">{error}</p>}
-      <p className="mt-2 text-[10px] text-slate-600">OCR runs in your browser. The image is not saved or uploaded.</p>
+      <p className="mt-2 text-[10px] text-slate-600">OCR runs in your browser. You can also press Ctrl+V anywhere to paste an image.</p>
     </div>
   );
 }
