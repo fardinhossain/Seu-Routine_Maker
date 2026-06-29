@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { CheckCircle2, ClipboardPaste, ImageUp, LoaderCircle, ScanText, X } from "lucide-react";
 import { extractCourseCodesFromOcr } from "../lib/ocr";
 
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
-const OCR_MAX_DIMENSION = 1600;
-const OCR_SETUP_TIMEOUT_MS = 45000;
-const OCR_RECOGNIZE_TIMEOUT_MS = 60000;
+const OCR_MAX_DIMENSION = 1800;
+const OCR_MOBILE_MAX_DIMENSION = 1600;
+const OCR_MIN_DIMENSION = 1200;
+const OCR_MOBILE_MIN_DIMENSION = 1100;
+const OCR_SETUP_TIMEOUT_MS = 60000;
+const OCR_RECOGNIZE_TIMEOUT_MS = 120000;
 const OCR_ASSET_PATH = "/tesseract";
 
 function withTimeout(promise, timeoutMs, message) {
@@ -39,7 +42,24 @@ function statusFromOcrMessage(message) {
   return "Scanning image";
 }
 
+function getOcrScale(width, height) {
+  const longest = Math.max(width, height);
+  if (!longest) return 1;
+
+  const isMobileLike =
+    window.matchMedia?.("(pointer: coarse)").matches ||
+    window.innerWidth < 768 ||
+    navigator.maxTouchPoints > 1;
+  const maxDimension = isMobileLike ? OCR_MOBILE_MAX_DIMENSION : OCR_MAX_DIMENSION;
+  const minDimension = isMobileLike ? OCR_MOBILE_MIN_DIMENSION : OCR_MIN_DIMENSION;
+
+  if (longest > maxDimension) return maxDimension / longest;
+  if (longest < minDimension) return Math.min(2.5, minDimension / longest);
+  return 1;
+}
+
 export default function ImageCourseScanner({ courses, onCodesDetected, resetKey }) {
+  const imageInputId = useId();
   const inputRef = useRef(null);
   const workerRef = useRef(null);
   const scanIdRef = useRef(0);
@@ -109,13 +129,15 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
       const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(objectUrl);
-        const scale = Math.min(1, OCR_MAX_DIMENSION / Math.max(img.naturalWidth, img.naturalHeight));
+        const scale = getOcrScale(img.naturalWidth, img.naturalHeight);
         const w = Math.max(1, Math.round(img.naturalWidth * scale));
         const h = Math.max(1, Math.round(img.naturalHeight * scale));
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, w, h);
 
         // Sample edge pixels to detect whether the background is dark
@@ -220,19 +242,25 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
       );
       if (scanId !== scanIdRef.current) return;
       const codes = extractCourseCodesFromOcr(result.data.text, courses);
+      console.debug("OCR scan debug", {
+        fileName: file.name || "Pasted screenshot",
+        detectedCodes: codes,
+        availableCourseCount: courses.length,
+        rawText: result.data.text,
+      });
 
       if (!codes.length) {
         setError("No matching saved course codes were detected. Try a clearer or more tightly cropped image.");
         return;
       }
 
+      setDetectedCodes(codes);
       const addedCodes = onCodesDetected(codes) || [];
       if (!addedCodes.length) {
-        setError("The detected courses are already selected, or another section of each course is active.");
+        setError(`Detected ${codes.join(", ")}, but they are already selected or another section is active.`);
         return;
       }
 
-      setDetectedCodes(addedCodes);
       setProgress(100);
       setScanStatus("Done");
     } catch (err) {
@@ -317,10 +345,11 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
   return (
     <div className="mt-4 min-w-0 max-w-full rounded-xl border border-dashed border-white/15 bg-black/10 p-3 sm:rounded-2xl sm:p-3.5">
       <input
+        id={imageInputId}
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
-        className="hidden"
+        accept="image/*"
+        className="sr-only"
         onChange={(event) => scanImage(event.target.files?.[0])}
       />
 
@@ -390,6 +419,7 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
             disabled={scanning || !courses.length}
             onClick={() => inputRef.current?.click()}
             title={courses.length ? "Upload a course screenshot" : "Parse UMS data first"}
+            aria-controls={imageInputId}
           >
             {scanning ? <LoaderCircle size={16} className="animate-spin" /> : <ImageUp size={16} />}
             {scanning ? "Scanning…" : "Upload image"}
@@ -401,7 +431,7 @@ export default function ImageCourseScanner({ courses, onCodesDetected, resetKey 
         <div className="mt-3 flex items-start gap-2 rounded-xl border border-mint-400/15 bg-mint-400/[.06] px-3 py-2.5 text-xs text-mint-300">
           <CheckCircle2 size={15} className="mt-0.5 shrink-0" />
           <p>
-            Added from image:{" "}
+            Detected from image:{" "}
             <strong className="font-mono text-mint-300">{detectedCodes.join(", ")}</strong>
           </p>
         </div>

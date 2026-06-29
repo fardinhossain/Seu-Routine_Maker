@@ -243,6 +243,50 @@ assert.deepEqual(
   ["CSE444.1", "CSE361.6", "CSE381.1"],
 );
 
+const dashboardOcrCourses = [
+  { courseCode: "CSE443.3", courseTitle: "Computer Graphics & Animation" },
+  { courseCode: "CSE444.3", courseTitle: "Computer Graphics & Animation Lab" },
+  { courseCode: "CSE361.6", courseTitle: "Operating Systems" },
+  { courseCode: "CSE362.2", courseTitle: "Operating Systems Lab" },
+  { courseCode: "CSE381.1", courseTitle: "Introduction to Embedded Systems" },
+  { courseCode: "CSE382.1", courseTitle: "Introduction to Embedded Systems Lab" },
+];
+
+assert.deepEqual(
+  extractCourseCodesFromOcr(
+    [
+      "CSE44S 3 Computer Graphics & Animation",
+      "CSE444.3 Computer Graphics & Animation Lab",
+      "CSE36I G Operating Systems",
+      "CSE362 2 Operating Systems Lab",
+      "CSE38I I Introduction to Embedded Systems",
+      "CSE382.1 Introduction to Embedded Systems Lab",
+    ].join("\n"),
+    dashboardOcrCourses,
+  ),
+  ["CSE443.3", "CSE444.3", "CSE361.6", "CSE362.2", "CSE381.1", "CSE382.1"],
+);
+
+assert.deepEqual(
+  extractCourseCodesFromOcr(
+    [
+      "Computer Graphics & Animation",
+      "Computer Graphics & Animation Lab",
+      "Operating Systems",
+      "Operating Systems Lab",
+      "Embedded Systems",
+      "Embedded Systems Lab",
+    ].join("\n"),
+    dashboardOcrCourses,
+  ),
+  ["CSE443.3", "CSE444.3", "CSE361.6", "CSE362.2", "CSE381.1", "CSE382.1"],
+);
+
+assert.deepEqual(
+  extractCourseCodesFromOcr("Operating Systems Lab", dashboardOcrCourses),
+  ["CSE362.2"],
+);
+
 const groupedSections = groupSectionsBySchedule([
   {
     courseCode: "CSE361.3",
