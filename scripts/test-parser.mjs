@@ -116,6 +116,28 @@ assert.throws(
   /Course sections found, but no timetable schedule found\./,
 );
 
+const rawPayloadDashboard = `
+  <main>
+    <!-- Registered Courses
+      CSE361.6
+      Operating Systems
+      [MRRR] Mst Rubaiya Raktin Raha
+      SUN # 13:30 ~ 14:50 @ SEU516
+      TUE # 13:30 ~ 14:50 @ SEU516
+    -->
+    <div
+      data-row="CSE443.3 Computer Graphics &amp; Animation [MHSU] Mahjabin Sultana MON # 13:30 ~ 14:50 @ SEU213B WED # 13:30 ~ 14:50 @ SEU213B">
+    </div>
+  </main>`;
+const rawPayloadCourses = parseUmsHtml(rawPayloadDashboard);
+assert.equal(rawPayloadCourses.parseDebug.sourceType, "dashboard-registered-courses");
+assert.deepEqual(rawPayloadCourses.map((course) => course.courseCode), ["CSE361.6", "CSE443.3"]);
+assert.equal(rawPayloadCourses.find((course) => course.courseCode === "CSE443.3").courseTitle, "Computer Graphics & Animation");
+assert.deepEqual(rawPayloadCourses.find((course) => course.courseCode === "CSE443.3").meetings, [
+  { day: "MON", start: "13:30", end: "14:50", room: "SEU213B" },
+  { day: "WED", start: "13:30", end: "14:50", room: "SEU213B" },
+]);
+
 const conflictRoutine = buildRoutine([
   {
     courseCode: "CSE361.3",

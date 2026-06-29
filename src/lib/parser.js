@@ -89,6 +89,32 @@ function cleanText(value = "") {
     .trim();
 }
 
+function decodeHtmlEntities(value = "") {
+  return String(value)
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number.parseInt(code, 10)))
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/g, "'");
+}
+
+function rawHtmlToSearchableText(rawHtml = "") {
+  return decodeHtmlEntities(rawHtml)
+    .replace(/<!--|-->/g, "\n")
+    .replace(/<\s*(br|\/p|\/div|\/li|\/tr|\/td|\/th|\/section|\/article|\/table)\b[^>]*>/gi, "\n")
+    .replace(/<\s*(p|div|li|tr|td|th|section|article|table)\b[^>]*>/gi, "\n")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "\n")
+    .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
 function normalizeSectionCode(value = "") {
   return cleanText(value).toUpperCase().replace(/\s+/g, "");
 }
@@ -274,6 +300,7 @@ function isDashboardTitleNoise(line = "", sectionCode = "") {
   if (DASHBOARD_SECTION_CODE_TEST.test(normalized)) return true;
   if (DASHBOARD_SCHEDULE_TEST.test(normalized)) return true;
   if (/^\[[A-Z]{2,6}\]/.test(upper)) return true;
+  if (/<\/?[a-z][^>]*>/i.test(normalized)) return true;
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(normalized)) return true;
   if (["COURSE", "FACULTY", "SCHEDULE", "REGISTERED COURSES", "STUDENT DASHBOARD"].includes(upper)) return true;
 
@@ -455,17 +482,26 @@ function parseDashboardTextChunks(source = "") {
   });
 }
 
-function parseDashboardRegisteredCourses(document) {
-  const source = structuralText(document.body || document);
-  const codeMatches = extractDashboardSectionCodeMatches(source);
-  const scheduleCount = countMatches(source.toUpperCase(), DASHBOARD_SCHEDULE_PATTERN);
+function parseDashboardRegisteredCourses(document, rawHtml = "") {
+  const domSource = structuralText(document.body || document);
+  const rawTextSource = rawHtmlToSearchableText(rawHtml);
+  const rawHtmlSource = decodeHtmlEntities(rawHtml);
+  const sources = [...new Set([domSource, rawTextSource, rawHtmlSource].filter((source) => source.trim()))];
+  const courseSectionCodeCount = Math.max(
+    0,
+    ...sources.map((source) => countMatches(source.toUpperCase(), DASHBOARD_SECTION_CODE_PATTERN)),
+  );
+  const scheduleLineCount = Math.max(
+    0,
+    ...sources.map((source) => countMatches(source.toUpperCase(), DASHBOARD_SCHEDULE_PATTERN)),
+  );
   const stats = {
-    courseSectionCodeCount: codeMatches.length,
-    scheduleLineCount: scheduleCount,
+    courseSectionCodeCount,
+    scheduleLineCount,
   };
 
-  if (!codeMatches.length) return { courses: [], ...stats };
-  if (!scheduleCount) {
+  if (!courseSectionCodeCount) return { courses: [], ...stats };
+  if (!scheduleLineCount) {
     return {
       courses: [],
       error: "Course sections found, but no timetable schedule found.",
@@ -478,12 +514,10 @@ function parseDashboardRegisteredCourses(document) {
     blocks.map((block) => parseDashboardCourseBlock(block.source, block.sectionCode)),
   );
 
-  if (!courses.length) {
-    blocks = parseDashboardTextChunks(source);
-    courses = mergeCourseEntries(
-      blocks.map((block) => parseDashboardCourseBlock(block.source, block.sectionCode)),
-    );
-  }
+  const textChunkEntries = sources.flatMap((source) =>
+    parseDashboardTextChunks(source).map((block) => parseDashboardCourseBlock(block.source, block.sectionCode)),
+  );
+  courses = mergeCourseEntries([...courses, ...textChunkEntries]);
 
   return { courses, ...stats };
 }
@@ -590,7 +624,7 @@ export function parseUmsHtml(rawHtml) {
     return attachParseDebug(result, debug);
   }
 
-  const dashboardResult = parseDashboardRegisteredCourses(document);
+  const dashboardResult = parseDashboardRegisteredCourses(document, htmlPayload);
   if (dashboardResult.error) {
     const debug = {
       courseSectionCodesFound: dashboardResult.courseSectionCodeCount,
