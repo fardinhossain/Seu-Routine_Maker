@@ -5,7 +5,7 @@
 
   **A fast, private, and mobile-friendly weekly routine builder for Southeast University students.**
 
-  Import a saved UMS page or scan a course screenshot, select your sections, and instantly create a clean seven-day class routine.
+  Plan sections from the UMS Offered Sections page, rebuild a registered routine from the Student Dashboard, or pick course codes from a screenshot.
 
   ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
   ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
@@ -30,9 +30,9 @@
 
 ## About
 
-SEU Routine Maker converts course information from the Southeast University UMS into a readable weekly routine. It parses course codes, titles, faculty initials, class days, start and end times, and rooms directly in the browser.
+SEU Routine Maker converts course information from the Southeast University UMS into a readable weekly routine. It parses course codes, titles, faculty initials, class days, start and end times, and rooms from both Offered Sections and Student Dashboard exports directly in the browser.
 
-No account, backend, or external database is required. The app is designed for both desktop and mobile devices and uses a dark theme inspired by the SEU UMS.
+No account, backend, or external database is required for routine data. The app is designed for both desktop and mobile devices and uses a dark theme inspired by the SEU UMS.
 
 ## Generated routine preview
 
@@ -46,18 +46,21 @@ No account, backend, or external database is required. The app is designed for b
 
 - Upload a saved UMS `.html`, `.htm`, `.mhtml`, or `.mht` page.
 - Paste raw UMS HTML manually.
-- Parse UMS Offered Sections and timetable information.
+- Parse UMS Offered Sections and Student Dashboard Registered Courses schedules.
+- Detect a Registered Courses export, select its courses, generate the routine, and scroll to the result automatically.
 - Store parsed data in browser `localStorage`.
 - Type multiple section codes using commas, spaces, or new lines.
 - Search saved sections by code or course title.
-- Filter organizer sections by exact time slot and single or combined meeting days.
-- Upload PNG, JPG, or WebP screenshots and detect course codes with browser-based OCR.
-- Generate the routine automatically—there is no Generate button.
+- Group organizer sections by schedule and filter them by course, teacher, exact time slot, or single/combined meeting days.
+- Preview an organizer routine before opening the completed result in a new tab.
+- Upload PNG, JPG, or WebP screenshots and detect course codes with locally hosted, browser-based OCR.
+- Update the routine live as section codes are added or removed.
 - Display all seven days: SAT, SUN, MON, TUE, WED, THU, and FRI.
 - Group classes with the same start time into one routine column.
 - Detect exact and partial timetable conflicts as codes are entered.
 - Prevent selecting more than one section of the same course.
 - Edit automatically generated short course names.
+- Switch routine cards between short/full course names and faculty initials/full names.
 - Print the routine or export it as PNG or PDF.
 - Restore the previous routine after reopening the browser.
 - Clear only the routine or reset all saved data.
@@ -79,11 +82,11 @@ Use this method with the UMS **Offered Sections** page.
 6. Open SEU Routine Maker.
 7. Under **Add your UMS export**, upload the saved `.html`, `.htm`, `.mhtml`, or `.mht` file.
 8. Wait for the success message confirming that the course sections were parsed and saved automatically.
-9. Add section codes using either option:
+9. Add section codes using any option:
    - Type or paste codes such as `CSE361.3`, one per line or separated by commas.
    - Use **Search saved sections** and select a result.
    - Open **Magic Organizer** to browse and filter all parsed sections visually.
-10. The weekly routine updates automatically.
+10. Typed and searched codes update the routine immediately. In Magic Organizer, select **Create Routine** to open the completed routine in a new tab.
 
 ### Using the Magic Organizer filters
 
@@ -94,6 +97,8 @@ The organizer filters can be combined to narrow the section list:
 3. Use **Day of Week** to select an exact single-day or combined-day schedule, such as **Sunday - Tuesday**.
 4. Use the violet arrow button to collapse or expand the filter controls.
 5. Select **Clear** to reset the search field and every active filter at once.
+6. Select one section per course. The organizer asks before replacing a section and warns before adding a timetable conflict.
+7. Use **Quick Preview**, copy the generated codes, or select **Create Routine** to save the selection and open the full routine.
 
 ### Method 2: After successfully completing course advising
 
@@ -101,15 +106,23 @@ Use this method to rebuild a routine from the courses visible on the Student Das
 
 1. Sign in to UMS and open **Student Dashboard**.
 2. Select the **Registered Courses** tab.
-3. Save the Registered Courses page as an HTML file.
-4. Upload that HTML file under **Add your UMS export**.
-5. Wait for the success message confirming that the HTML was parsed automatically before using image recognition.
-6. Take a clear screenshot of the Registered Courses table. Make sure the course codes and section numbers are readable.
-7. Under **Pick codes from an image**, select **Upload image**.
-8. Wait for OCR to finish. Detected codes are added automatically, and the routine updates immediately.
+3. Wait until the registered-course schedules are fully visible, then save the page as an HTML or MHTML file.
+4. Upload the saved file under **Add your UMS export**.
+5. The app detects the Registered Courses page, selects every registered course, generates the routine automatically, and scrolls to the result.
 
 > [!IMPORTANT]
-> Image recognition selects codes from the course data already parsed from HTML. Always upload the relevant UMS HTML file and wait for the parsing success message before uploading a screenshot.
+> A Registered Courses export does not require a screenshot or OCR. The schedules in the saved page are enough to rebuild the routine.
+
+### Optional: Pick codes from an image
+
+The image scanner is useful when you have already imported an Offered Sections page and have a screenshot containing the section codes you want:
+
+1. Upload and parse the relevant UMS HTML or MHTML export first.
+2. Under **Pick codes from an image**, select a clear PNG, JPG, or WebP screenshot.
+3. Wait for OCR to finish. Codes that match the parsed course data are added automatically.
+
+> [!NOTE]
+> OCR only selects codes that exist in the imported course data. Screenshots are processed locally in browser memory and are not required for the Registered Courses method above.
 
 ### Supported code formats
 
@@ -175,11 +188,11 @@ When a conflict is found:
 
 ## Data storage, privacy, and security
 
-### Is any data stored permanently?
+### Is routine data stored permanently?
 
-**No data is stored in a permanent cloud database or on an application server.** SEU Routine Maker has no backend, user account system, or database. Routine processing happens inside the user's browser.
+**UMS exports, screenshots, parsed courses, and routines are not stored in a cloud database or sent to an application server.** SEU Routine Maker has no backend, user account system, or routine database. Parsing, OCR, routine generation, and exports happen inside the user's browser.
 
-The app does use browser `localStorage`, so some data remains available on the same browser after closing or reopening the website. It stays there until the user selects **Reset saved data**, clears the browser's site data, or removes the browser profile.
+The app uses browser `localStorage`, so routine data remains available in the same browser after closing or reopening the website. It stays there until the user selects **Reset saved data**, clears the browser's site data, or removes the browser profile.
 
 | Data | Storage location | Retention |
 |---|---|---|
@@ -187,8 +200,10 @@ The app does use browser `localStorage`, so some data remains available on the s
 | Parsed course sections | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
 | Selected course codes | Browser `localStorage` | Until **Clear routine**, **Clear HTML**, **Reset saved data**, or browser site data is cleared |
 | Custom short names | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
+| Routine display preferences | Browser `localStorage` | Until **Clear HTML**, **Reset saved data**, or browser site data is cleared |
 | Uploaded screenshots | Browser memory only | Cleared after reset, reload, or leaving the page |
-| OCR language model | Browser cache/IndexedDB | Managed by the browser and removable through site-data settings |
+| Locally hosted OCR assets | Browser cache | Managed by the browser and removable through site-data settings |
+| Anonymous page-view metadata | Vercel Web Analytics | Managed under Vercel's analytics retention policy |
 
 ### Private by design
 
@@ -196,6 +211,7 @@ The app does use browser `localStorage`, so some data remains available on the s
 - No UMS password or login credential is requested or collected.
 - Uploaded screenshots are processed locally in the browser with Tesseract.js.
 - The saved UMS HTML is parsed locally and is never rendered as executable page content.
+- The deployed app uses [Vercel Web Analytics](https://vercel.com/docs/analytics/privacy-policy) for anonymous, cookie-free page-view statistics. It may record the page path, referrer, approximate location, browser, operating system, and device type, but it does not receive imported UMS data, screenshots, selected codes, or generated routines.
 - **Clear HTML** removes imported HTML, parsed sections, selected codes, custom labels, routine data, and image-scanner state.
 - **Clear routine** removes selected courses and resets the image scanner while keeping parsed UMS data.
 - **Reset saved data** removes imported HTML, parsed courses, selections, custom labels, and image-scanner state from the app.
@@ -203,7 +219,7 @@ The app does use browser `localStorage`, so some data remains available on the s
 > [!IMPORTANT]
 > Browser `localStorage` is not encrypted. Anyone with access to the same unlocked browser profile may be able to inspect locally saved data. On a shared or public device, use **Reset saved data** when finished and clear the browser's site data for additional privacy.
 
-The app is therefore private and secure from server-side data collection by design, while local-device security still depends on the user's browser profile and device access.
+Routine content stays client-side by design. Local-device security still depends on the user's browser profile and device access, while anonymous site-usage metadata is handled by Vercel Web Analytics as described above.
 
 ## Run locally
 
@@ -247,13 +263,16 @@ The optimized production files are created in `dist/`.
 | `npm run dev` | Start the Vite development server. |
 | `npm run build` | Create an optimized production build. |
 | `npm run preview` | Preview the production build locally. |
-| `npm test` | Run parser, OCR-code matching, conflict, and duplicate-section checks. |
+| `npm test` | Run Offered Sections/dashboard parser, OCR-code matching, conflict, and duplicate-section checks. |
 
 ## Project structure
 
 ```text
 Seu-Routine_Maker/
+├── docs/
+│   └── images/
 ├── public/
+│   ├── tesseract/
 │   └── favicon.svg
 ├── scripts/
 │   └── test-parser.mjs
@@ -262,14 +281,18 @@ Seu-Routine_Maker/
 │   │   ├── AppHeader.jsx
 │   │   ├── ConflictAlert.jsx
 │   │   ├── CoursePicker.jsx
+│   │   ├── DataPolicyModal.jsx
 │   │   ├── ImageCourseScanner.jsx
 │   │   ├── ImportPanel.jsx
+│   │   ├── LoadingScreen.jsx
 │   │   ├── RoutineTable.jsx
+│   │   ├── SectionOrganizerPage.jsx
 │   │   └── ShortNameEditor.jsx
 │   ├── lib/
 │   │   ├── ocr.js
 │   │   ├── parser.js
 │   │   ├── routine.js
+│   │   ├── sectionGroups.js
 │   │   └── storage.js
 │   ├── App.jsx
 │   ├── index.css
@@ -324,6 +347,7 @@ Hard-refresh the browser using `Ctrl + F5`.
 - **jsPDF** for PDF export
 - **Lucide React** for icons
 - **localStorage** for browser persistence
+- **Vercel Web Analytics** for anonymous page-view statistics
 
 ## Developer
 
