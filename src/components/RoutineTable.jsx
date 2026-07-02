@@ -140,7 +140,9 @@ const RoutineTable = forwardRef(function RoutineTable(
               </th>
               {routine.slots.map((slot) => (
                 <th key={slot.key} className="routine-slot-heading min-w-[150px] border-b border-r border-white/[.07] px-3 py-3 last:border-r-0 sm:min-w-[176px] sm:px-4">
-                  <span className="block font-mono text-sm font-semibold text-slate-200">{formatTime12(slot.start)}</span>
+                  <span className="block font-mono text-sm font-semibold text-slate-200">
+                    {(slot.starts || [slot.start]).map(formatTime12).join(" / ")}
+                  </span>
                   <span className="mt-0.5 block font-mono text-[10px] font-normal text-slate-500">
                     to{" "}
                     {slot.ends.map((end, index) => (

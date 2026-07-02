@@ -184,6 +184,48 @@ assert.deepEqual(sharedStartRoutine.slots, [
   { key: "11:30", start: "11:30", ends: ["12:50", "13:30"] },
 ]);
 
+const mergedMorningRoutine = buildRoutine([
+  {
+    courseCode: "CSE444.3",
+    courseTitle: "Computer Graphics & Animation Lab",
+    meetings: [{ day: "SAT", start: "08:00", end: "10:00", room: "SEU804" }],
+  },
+  {
+    courseCode: "CSE381.6",
+    courseTitle: "Introduction to Embedded Systems",
+    meetings: [{ day: "SUN", start: "08:30", end: "09:50", room: "SEU406" }],
+  },
+]);
+assert.deepEqual(mergedMorningRoutine.slots, [
+  {
+    key: "08:00/08:30",
+    start: "08:00",
+    starts: ["08:00", "08:30"],
+    ends: ["10:00", "09:50"],
+  },
+]);
+assert.deepEqual(
+  mergedMorningRoutine.entries.map((entry) => entry.slotKey),
+  ["08:00/08:30", "08:00/08:30"],
+);
+
+const separateMorningRoutine = buildRoutine([
+  {
+    courseCode: "CSE361.1",
+    courseTitle: "Operating Systems",
+    meetings: [{ day: "SAT", start: "08:00", end: "09:20", room: "SEU406" }],
+  },
+  {
+    courseCode: "CSE381.6",
+    courseTitle: "Introduction to Embedded Systems",
+    meetings: [{ day: "SUN", start: "08:30", end: "09:50", room: "SEU406" }],
+  },
+]);
+assert.deepEqual(separateMorningRoutine.slots, [
+  { key: "08:00", start: "08:00", ends: ["09:20"] },
+  { key: "08:30", start: "08:30", ends: ["09:50"] },
+]);
+
 const repeatedCourseCodes = parseCodeList("CSE361.6\nCSE443.4\nCSE362.4\nCSE362.3");
 assert.deepEqual(uniqueCourseSelections(repeatedCourseCodes), ["CSE361.6", "CSE443.4", "CSE362.4"]);
 assert.deepEqual(findDuplicateCourseSelections(repeatedCourseCodes), [

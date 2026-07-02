@@ -67,14 +67,33 @@ export function findDuplicateCourseSelections(codes = []) {
     .map(([course, sections]) => ({ course, sections }));
 }
 
+function isLabCourse(course = {}) {
+  return /\blab(?:oratory)?\b/i.test([
+    course.courseTitle,
+    course.shortTitle,
+    course.shortName,
+  ].filter(Boolean).join(" "));
+}
+
 export function buildRoutine(courses) {
+  const mergeMorningSlots = courses.some((course) =>
+    isLabCourse(course)
+      && course.meetings.some((meeting) => timeToMinutes(meeting.start) === 8 * 60),
+  );
+
   const entries = courses.flatMap((course) =>
-    course.meetings.map((meeting, meetingIndex) => ({
-      ...meeting,
-      course,
-      id: `${course.courseCode}-${meeting.day}-${meeting.start}-${meeting.end}-${meetingIndex}`,
-      slotKey: meeting.start,
-    })),
+    course.meetings.map((meeting, meetingIndex) => {
+      const startMinutes = timeToMinutes(meeting.start);
+      const useMergedMorningSlot = mergeMorningSlots
+        && (startMinutes === 8 * 60 || startMinutes === 8 * 60 + 30);
+
+      return {
+        ...meeting,
+        course,
+        id: `${course.courseCode}-${meeting.day}-${meeting.start}-${meeting.end}-${meetingIndex}`,
+        slotKey: useMergedMorningSlot ? "08:00/08:30" : meeting.start,
+      };
+    }),
   );
 
   const slotMap = new Map();
@@ -82,17 +101,34 @@ export function buildRoutine(courses) {
     const slot = slotMap.get(entry.slotKey) || {
       key: entry.slotKey,
       start: entry.start,
+      ranges: [],
       ends: [],
     };
-    if (!slot.ends.includes(entry.end)) {
-      slot.ends.push(entry.end);
-      slot.ends.sort((left, right) => timeToMinutes(left) - timeToMinutes(right));
+
+    if (!slot.ranges.some((range) => range.start === entry.start && range.end === entry.end)) {
+      slot.ranges.push({ start: entry.start, end: entry.end });
     }
     slotMap.set(entry.slotKey, slot);
   });
-  const slots = [...slotMap.values()].sort(
-    (left, right) => timeToMinutes(left.start) - timeToMinutes(right.start),
-  );
+  const slots = [...slotMap.values()]
+    .map((slot) => {
+      slot.ranges.sort((left, right) =>
+        timeToMinutes(left.start) - timeToMinutes(right.start)
+          || timeToMinutes(left.end) - timeToMinutes(right.end),
+      );
+
+      const starts = [...new Set(slot.ranges.map((range) => range.start))];
+      const ends = [...new Set(slot.ranges.map((range) => range.end))];
+      const result = {
+        key: slot.key,
+        start: starts[0],
+        ends,
+      };
+
+      if (starts.length > 1) result.starts = starts;
+      return result;
+    })
+    .sort((left, right) => timeToMinutes(left.start) - timeToMinutes(right.start));
 
   const conflictIds = new Set();
   const conflicts = [];
